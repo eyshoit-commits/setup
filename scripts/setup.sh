@@ -76,7 +76,7 @@ if [ "$SETUP_MODE" = "repro" ]; then
     echo -e "${RED}❌ REPRO mode does not allow ALLOW_LATEST=true${NC}"
     exit 1
   fi
-  
+
   # Prefer artifacts
   if [ -d "artifacts" ] && [ "$(ls -A artifacts 2>/dev/null)" ]; then
     OFFLINE_MODE=true
@@ -90,7 +90,7 @@ fi
 echo ""
 echo -e "${BLUE}📦 Initializing supply chain provenance...${NC}"
 
-SETUP_ID="$(date +%Y%m%d-%H%M%S)-$(openssl rand -hex 3 2>/dev/null || echo "$(date +%s)")"
+SETUP_ID="$(date +%Y%m%d-%H%M%S)-$(openssl rand -hex 3 2>/dev/null || head -c 6 /dev/urandom 2>/dev/null | od -An -tx1 | tr -d ' \n' || date +%s)"
 PROVENANCE_FILE="$REPO_ROOT/provenance.json"
 
 # Initialize provenance.json
@@ -122,13 +122,13 @@ record_installer() {
   local source=$3  # "remote" or "artifact"
   local location=$4
   local hash=""
-  
+
   if [ -f "$location" ]; then
     hash=$(sha256sum "$location" 2>/dev/null | awk '{print $1}' || echo "unavailable")
   else
     hash="not_downloaded"
   fi
-  
+
   # Use Python/jq if available, otherwise simple append
   if command -v jq &> /dev/null; then
     local tmp_file=$(mktemp)
@@ -153,7 +153,7 @@ install_with_strict_check() {
   local tool=$1
   local expected_version=$2
   local actual_version=$3
-  
+
   if [ "$STRICT_VERSIONS" = "true" ] && [ "$expected_version" != "$actual_version" ]; then
     echo -e "${RED}❌ REPRO mode: Version mismatch for $tool${NC}"
     echo "   Expected: $expected_version"
@@ -187,7 +187,7 @@ log_status() {
   local version=$2
   local path=$3
   local status=$4  # installed, skipped, failed
-  
+
   if command -v jq &> /dev/null; then
     local tmp_file=$(mktemp)
     jq --arg tool "$tool" \
@@ -209,11 +209,11 @@ log_status() {
 if [ "$FEATURE_NODE" = "true" ]; then
   echo ""
   echo -e "${BLUE}━━━ Installing Node.js (FEATURE_NODE=true) ━━━${NC}"
-  
+
   if command -v node &> /dev/null; then
     NODE_CURRENT=$(node --version | sed 's/^v//')
     echo "ℹ️  Node.js already installed: $NODE_CURRENT"
-    
+
     if [ "$NODE_CURRENT" = "$NODE_VERSION" ]; then
       echo "✅ Version matches expected: $NODE_VERSION"
       log_status "node" "$NODE_CURRENT" "$(which node)" "installed"
@@ -223,32 +223,33 @@ if [ "$FEATURE_NODE" = "true" ]; then
     fi
   else
     echo "📦 Installing Node.js $NODE_VERSION via nvm..."
-    
+
     # Install nvm
     if [ ! -d "$HOME/.nvm" ]; then
       NVM_INSTALLER="/tmp/nvm-install-$SETUP_ID.sh"
-      curl -o "$NVM_INSTALLER" -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh"
+      # Download with TLS verification (curl uses system CA certs by default)
+      curl -o "$NVM_INSTALLER" -fsSL --tlsv1.2 "https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh"
       record_installer "nvm" "$NVM_VERSION" "remote" "$NVM_INSTALLER"
-      
+
       bash "$NVM_INSTALLER"
       rm -f "$NVM_INSTALLER"
     fi
-    
+
     # Source nvm
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
-    
+
     # Install Node
     nvm install "$NODE_VERSION"
     nvm use "$NODE_VERSION"
     nvm alias default "$NODE_VERSION"
-    
+
     NODE_ACTUAL=$(node --version | sed 's/^v//')
     install_with_strict_check "node" "$NODE_VERSION" "$NODE_ACTUAL"
-    
+
     echo -e "${GREEN}✅ Node.js $NODE_ACTUAL installed${NC}"
     log_status "node" "$NODE_ACTUAL" "$(which node)" "installed"
-    
+
     # Install pnpm
     npm install -g "pnpm@${PNPM_VERSION}"
     echo -e "${GREEN}✅ pnpm $PNPM_VERSION installed${NC}"
@@ -265,12 +266,12 @@ fi
 if [ "$FEATURE_PYTHON" = "true" ]; then
   echo ""
   echo -e "${BLUE}━━━ Installing Python (FEATURE_PYTHON=true) ━━━${NC}"
-  
+
   if command -v python &> /dev/null || command -v python3 &> /dev/null; then
     PYTHON_CMD=$(command -v python || command -v python3)
     PYTHON_CURRENT=$($PYTHON_CMD --version 2>&1 | awk '{print $2}')
     echo "ℹ️  Python already installed: $PYTHON_CURRENT"
-    
+
     if [[ "$PYTHON_CURRENT" == "$PYTHON_VERSION"* ]]; then
       echo "✅ Version matches expected: $PYTHON_VERSION"
       log_status "python" "$PYTHON_CURRENT" "$PYTHON_CMD" "installed"
@@ -280,26 +281,27 @@ if [ "$FEATURE_PYTHON" = "true" ]; then
     fi
   else
     echo "📦 Installing Python $PYTHON_VERSION via Miniconda..."
-    
+
     CONDA_INSTALLER="/tmp/miniconda-$SETUP_ID.sh"
     CONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-py312_${MINICONDA_VERSION}-Linux-$(uname -m).sh"
-    
-    curl -o "$CONDA_INSTALLER" -fsSL "$CONDA_URL"
+
+    # Download with TLS verification
+    curl -o "$CONDA_INSTALLER" -fsSL --tlsv1.2 "$CONDA_URL"
     record_installer "miniconda" "$MINICONDA_VERSION" "remote" "$CONDA_INSTALLER"
-    
+
     bash "$CONDA_INSTALLER" -b -p "$HOME/miniconda3"
     rm -f "$CONDA_INSTALLER"
-    
+
     # Initialize conda
     eval "$($HOME/miniconda3/bin/conda shell.bash hook)"
     conda init bash
-    
+
     PYTHON_ACTUAL=$(python --version 2>&1 | awk '{print $2}')
     install_with_strict_check "python" "$PYTHON_VERSION" "$PYTHON_ACTUAL"
-    
+
     echo -e "${GREEN}✅ Python $PYTHON_ACTUAL installed${NC}"
     log_status "python" "$PYTHON_ACTUAL" "$(which python)" "installed"
-    
+
     # Install uv (modern Python package installer)
     pip install uv
     echo -e "${GREEN}✅ uv package manager installed${NC}"
@@ -316,11 +318,11 @@ fi
 if [ "$FEATURE_RUST" = "true" ]; then
   echo ""
   echo -e "${BLUE}━━━ Installing Rust (FEATURE_RUST=true) ━━━${NC}"
-  
+
   if command -v rustc &> /dev/null; then
     RUST_CURRENT=$(rustc --version | awk '{print $2}')
     echo "ℹ️  Rust already installed: $RUST_CURRENT"
-    
+
     if [ "$RUST_CURRENT" = "$RUST_VERSION" ]; then
       echo "✅ Version matches expected: $RUST_VERSION"
       log_status "rust" "$RUST_CURRENT" "$(which rustc)" "installed"
@@ -330,19 +332,20 @@ if [ "$FEATURE_RUST" = "true" ]; then
     fi
   else
     echo "📦 Installing Rust $RUST_VERSION via rustup..."
-    
+
     RUSTUP_INSTALLER="/tmp/rustup-init-$SETUP_ID.sh"
-    curl -o "$RUSTUP_INSTALLER" -fsSL "https://sh.rustup.rs"
+    # Download with TLS verification
+    curl -o "$RUSTUP_INSTALLER" -fsSL --tlsv1.2 "https://sh.rustup.rs"
     record_installer "rustup" "$RUST_VERSION" "remote" "$RUSTUP_INSTALLER"
-    
+
     sh "$RUSTUP_INSTALLER" -y --default-toolchain "$RUST_VERSION"
     rm -f "$RUSTUP_INSTALLER"
-    
+
     source "$HOME/.cargo/env"
-    
+
     RUST_ACTUAL=$(rustc --version | awk '{print $2}')
     install_with_strict_check "rust" "$RUST_VERSION" "$RUST_ACTUAL"
-    
+
     echo -e "${GREEN}✅ Rust $RUST_ACTUAL installed${NC}"
     log_status "rust" "$RUST_ACTUAL" "$(which rustc)" "installed"
   fi
@@ -358,7 +361,7 @@ fi
 if [ "$FEATURE_AI" = "true" ]; then
   echo ""
   echo -e "${BLUE}━━━ Installing AI Tools (FEATURE_AI=true) ━━━${NC}"
-  
+
   if command -v python &> /dev/null || command -v python3 &> /dev/null; then
     pip install openai anthropic langchain
     echo -e "${GREEN}✅ AI libraries installed${NC}"
@@ -414,7 +417,7 @@ if [ "$FORCE_UNSAFE" = "true" ]; then
   echo -e "${RED}⚠️  WARNING: Security gates disabled!${NC}"
 else
   echo "🔒 Installing pre-commit hooks (mandatory)"
-  
+
   if ! command -v pre-commit &> /dev/null; then
     if command -v pip &> /dev/null; then
       pip install pre-commit
@@ -422,7 +425,7 @@ else
       echo -e "${YELLOW}⚠️  Python/pip not available, skipping pre-commit${NC}"
     fi
   fi
-  
+
   if command -v pre-commit &> /dev/null; then
     # Create a basic .pre-commit-config.yaml if it doesn't exist
     if [ ! -f ".pre-commit-config.yaml" ]; then
@@ -440,9 +443,9 @@ repos:
 PRECOMMIT
       echo "✅ Created .pre-commit-config.yaml"
     fi
-    
+
     pre-commit install
-    
+
     echo -e "${GREEN}✅ pre-commit hooks installed and verified${NC}"
     echo -e "${GREEN}✅ Golden Path enforced: commits will be checked${NC}"
   fi
@@ -496,19 +499,19 @@ HANDSHAKE_FILE="$REPO_ROOT/agent-handshake.json"
 TOOLCHAINS="[]"
 if command -v jq &> /dev/null; then
   TOOLCHAINS="["
-  
+
   if [ "$FEATURE_NODE" = "true" ] && command -v node &> /dev/null; then
     TOOLCHAINS="$TOOLCHAINS{\"name\":\"node\",\"version\":\"$(node --version | sed 's/^v//')\",\"path\":\"$(which node)\",\"available\":true},"
   fi
-  
+
   if [ "$FEATURE_PYTHON" = "true" ] && command -v python &> /dev/null; then
     TOOLCHAINS="$TOOLCHAINS{\"name\":\"python\",\"version\":\"$(python --version 2>&1 | awk '{print $2}')\",\"path\":\"$(which python)\",\"available\":true},"
   fi
-  
+
   if [ "$FEATURE_RUST" = "true" ] && command -v rustc &> /dev/null; then
     TOOLCHAINS="$TOOLCHAINS{\"name\":\"rust\",\"version\":\"$(rustc --version | awk '{print $2}')\",\"path\":\"$(which rustc)\",\"available\":true},"
   fi
-  
+
   # Remove trailing comma
   TOOLCHAINS="${TOOLCHAINS%,}]"
 fi

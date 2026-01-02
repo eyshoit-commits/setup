@@ -99,7 +99,11 @@ Write-Output ""
 Write-ColorOutput Cyan "📦 Initializing supply chain provenance..."
 
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$RandomHex = -join ((1..3) | ForEach-Object { "{0:x2}" -f (Get-Random -Maximum 256) })
+# Use cryptographically secure random number generator
+$Rng = New-Object System.Security.Cryptography.RNGCryptoServiceProvider
+$RandomBytes = New-Object byte[] 3
+$Rng.GetBytes($RandomBytes)
+$RandomHex = -join ($RandomBytes | ForEach-Object { "{0:x2}" -f $_ })
 $SetupId = "$Timestamp-$RandomHex"
 $ProvenanceFile = Join-Path $RepoRoot "provenance.json"
 
@@ -131,12 +135,12 @@ function Record-Installer {
         [string]$Source,
         [string]$Location
     )
-    
+
     $Hash = "unavailable"
     if (Test-Path $Location) {
         $Hash = (Get-FileHash -Path $Location -Algorithm SHA256).Hash
     }
-    
+
     $Prov = Get-Content $ProvenanceFile | ConvertFrom-Json
     $Prov.installers += @{
         name = $Name
@@ -176,7 +180,7 @@ function Log-Status {
         [string]$Path,
         [string]$Status
     )
-    
+
     $Rep = Get-Content $ReportFile | ConvertFrom-Json
     $Rep.tools += @{
         name = $Tool
@@ -185,13 +189,13 @@ function Log-Status {
         status = $Status
     }
     $Rep.summary.total++
-    
+
     switch ($Status) {
         "installed" { $Rep.summary.installed++ }
         "skipped" { $Rep.summary.skipped++ }
         "failed" { $Rep.summary.failed++ }
     }
-    
+
     $Rep | ConvertTo-Json -Depth 10 | Out-File -FilePath $ReportFile -Encoding utf8
 }
 
@@ -201,11 +205,11 @@ function Log-Status {
 if ($env:FEATURE_NODE -eq "true") {
     Write-Output ""
     Write-ColorOutput Cyan "━━━ Installing Node.js (FEATURE_NODE=true) ━━━"
-    
+
     if (Get-Command node -ErrorAction SilentlyContinue) {
         $NodeCurrent = (node --version) -replace '^v', ''
         Write-Output "ℹ️  Node.js already installed: $NodeCurrent"
-        
+
         if ($NodeCurrent -eq $env:NODE_VERSION) {
             Write-Output "✅ Version matches expected: $($env:NODE_VERSION)"
         } else {
@@ -230,7 +234,7 @@ if ($env:FEATURE_NODE -eq "true") {
 if ($env:FEATURE_PYTHON -eq "true") {
     Write-Output ""
     Write-ColorOutput Cyan "━━━ Installing Python (FEATURE_PYTHON=true) ━━━"
-    
+
     if (Get-Command python -ErrorAction SilentlyContinue) {
         $PythonCurrent = (python --version 2>&1) -replace 'Python ', ''
         Write-Output "ℹ️  Python already installed: $PythonCurrent"
@@ -253,7 +257,7 @@ if ($env:FEATURE_PYTHON -eq "true") {
 if ($env:FEATURE_RUST -eq "true") {
     Write-Output ""
     Write-ColorOutput Cyan "━━━ Installing Rust (FEATURE_RUST=true) ━━━"
-    
+
     if (Get-Command rustc -ErrorAction SilentlyContinue) {
         $RustCurrent = (rustc --version) -replace 'rustc ', '' -replace ' \(.+\)', ''
         Write-Output "ℹ️  Rust already installed: $RustCurrent"

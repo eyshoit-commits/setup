@@ -49,9 +49,9 @@ check_drift() {
   local tool=$1
   local expected=$2
   local actual=$3
-  
+
   ((CHECKS++))
-  
+
   if [ "$expected" != "$actual" ]; then
     if [ "$SETUP_MODE" = "repro" ]; then
       echo -e "${RED}❌ DRIFT: $tool expected $expected, got $actual (REPRO mode - FAILING)${NC}"
@@ -86,7 +86,9 @@ if [ "$FEATURE_PYTHON" = "true" ]; then
     ACTUAL_PYTHON=$(python --version 2>/dev/null | awk '{print $2}' || echo "not_installed")
     # Python version might have extra patch version, so check prefix
     if [[ "$ACTUAL_PYTHON" == "$PYTHON_VERSION"* ]]; then
-      check_drift "python" "$PYTHON_VERSION" "$ACTUAL_PYTHON"
+      # Version matches prefix (e.g., 3.12.1 matches 3.12.1*)
+      echo -e "${GREEN}✅ python version match: $ACTUAL_PYTHON${NC}"
+      ((CHECKS++))
     else
       check_drift "python" "$PYTHON_VERSION" "$ACTUAL_PYTHON"
     fi
@@ -115,7 +117,7 @@ echo ""
 echo -e "${BLUE}Checking provenance...${NC}"
 if [ -f "provenance.json" ]; then
   echo -e "${GREEN}✅ provenance.json exists${NC}"
-  
+
   if command -v jq &> /dev/null; then
     SETUP_ID=$(jq -r '.setup_id' provenance.json)
     TIMESTAMP=$(jq -r '.timestamp' provenance.json)
@@ -131,7 +133,7 @@ echo ""
 echo -e "${BLUE}Checking agent handshake...${NC}"
 if [ -f "agent-handshake.json" ]; then
   echo -e "${GREEN}✅ agent-handshake.json exists${NC}"
-  
+
   if command -v jq &> /dev/null; then
     STATUS=$(jq -r '.setup_status' agent-handshake.json)
     PROTOCOL=$(jq -r '.protocol_version' agent-handshake.json)
@@ -151,7 +153,7 @@ if [ $DRIFTS -eq 0 ]; then
   exit 0
 else
   echo -e "${YELLOW}⚠️  $DRIFTS drift(s) detected out of $CHECKS checks${NC}"
-  
+
   if [ "$SETUP_MODE" = "repro" ]; then
     echo -e "${RED}❌ REPRO mode - exiting with error${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
