@@ -1,5 +1,29 @@
 queue_rules:
   - name: Merge
+    queue_conditions:
+      # The following status checks must mirror .github/branch-protection.json
+      - "check-success=Security Scan"
+      - "check-success=CodeQL Analysis"
+      - "check-success=Dependency Vulnerability Scan"
+      - "check-success=Secret Scan (Gitleaks)"
+      - "check-success=Static Application Security Testing"
+      - "check-success=Lint / Code Quality"
+      - "check-success=Unit Tests"
+      - "check-success=Integration Tests"
+      - "check-success=End-to-End Tests"
+      - "check-success=Format Check"
+      - "check-success=AI Code Review"
+      - "check-success=AI Security Review"
+      - "check-success=License Compliance"
+      - "check-success=SBOM Generation"
+      - "check-success=Build Validation"
+      - "check-success=Docs Validation"
+      - "check-success=Pre-commit Hooks"
+      - "check-success=Cross-Platform CI (Linux)"
+      - "check-success=Cross-Platform CI (macOS)"
+      - "check-success=Cross-Platform CI (Windows)"
+      - "check-success=Smoke Tests"
+      - "check-success=Validation Workflow"
     conditions:
       # Target the protected main branch
       - base=main
