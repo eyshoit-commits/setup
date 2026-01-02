@@ -1,0 +1,72 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/runner/work/setup/setup"
+      ],
+      "description": "Filesystem access for repository operations",
+      "permissions": {
+        "read": true,
+        "write": true
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub API integration for repository management",
+      "permissions": {
+        "read": true,
+        "write": true
+      }
+    },
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git",
+        "/home/runner/work/setup/setup"
+      ],
+      "description": "Git operations for version control",
+      "permissions": {
+        "read": true,
+        "write": true
+      }
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      },
+      "description": "Web search integration for documentation lookup",
+      "permissions": {
+        "read": true
+      }
+    }
+  },
+  "settings": {
+    "timeout": 30000,
+    "retries": 3,
+    "logging": {
+      "level": "info",
+      "format": "json"
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "description": "MCP Server configuration for enterprise setup repository",
+    "author": "Enterprise Setup Team"
+  }
+}

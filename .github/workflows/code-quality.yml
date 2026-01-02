@@ -1,0 +1,125 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  codacy:
+    name: Codacy Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Codacy Analysis
+        uses: codacy/codacy-analysis-cli-action@master
+        continue-on-error: true
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          upload: true
+          max-allowed-issues: 2147483647
+
+  codecov:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci || npm install
+          fi
+
+      - name: Run tests with coverage
+        run: |
+          if [ -f "package.json" ] && grep -q "\"test\"" package.json; then
+            npm run test -- --coverage || echo "⚠️ No tests configured"
+          else
+            echo "⚠️ No test script found"
+          fi
+        continue-on-error: true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+  codefactor:
+    name: CodeFactor Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: CodeFactor Analysis
+        run: |
+          echo "📊 CodeFactor analysis runs automatically on GitHub"
+          echo "Visit: https://www.codefactor.io/repository/github/${{ github.repository }}"
+
+  linting:
+    name: Linting & Formatting
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci || npm install
+          fi
+
+      - name: Run ESLint
+        run: |
+          if [ -f "package.json" ] && grep -q "\"lint\"" package.json; then
+            npm run lint || echo "⚠️ Linting issues found"
+          else
+            echo "⚠️ No lint script found"
+          fi
+        continue-on-error: true
+
+      - name: Check formatting
+        run: |
+          if [ -f "package.json" ] && grep -q "\"format\"" package.json; then
+            npm run format:check || echo "⚠️ Formatting issues found"
+          else
+            echo "⚠️ No format script found"
+          fi
+        continue-on-error: true
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          severity: warning

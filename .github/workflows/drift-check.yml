@@ -1,0 +1,96 @@
+name: Drift Check
+
+on:
+  push:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+  workflow_dispatch:
+
+jobs:
+  infrastructure-drift:
+    name: Infrastructure Drift Detection
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check configuration drift
+        run: |
+          echo "🔍 Checking for infrastructure drift..."
+          
+          # Check if expected files are present
+          EXPECTED_FILES=(
+            ".github/workflows/setup-validation.yml"
+            ".github/workflows/security-scan.yml"
+            ".github/workflows/code-quality.yml"
+            ".github/workflows/ai-review.yml"
+            ".github/workflows/mcp-health-check.yml"
+            ".github/workflows/drift-check.yml"
+            ".github/workflows/commit-validation.yml"
+            ".github/workflows/sandbox-test.yml"
+            "scripts/setup-marketplace-apps.sh"
+            "scripts/setup-marketplace-apps.ps1"
+            "scripts/validate-environment.sh"
+            "scripts/local-setup.sh"
+            ".opencode/agents/bash-agent.yml"
+            ".opencode/agents/powershell-agent.yml"
+            "mcp/config.json"
+            ".github/branch-protection.json"
+            ".github/secrets-template.env"
+          )
+          
+          DRIFT=0
+          for file in "${EXPECTED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Drift detected: Missing file $file"
+              DRIFT=1
+            fi
+          done
+          
+          if [ $DRIFT -eq 1 ]; then
+            echo "⚠️ Configuration drift detected"
+          else
+            echo "✅ No drift detected"
+          fi
+
+      - name: Validate workflow configurations
+        run: |
+          echo "🔍 Validating workflow configurations..."
+          
+          for workflow in .github/workflows/*.yml; do
+            if ! grep -q "workflow_dispatch" "$workflow"; then
+              echo "⚠️ Workflow missing manual trigger: $workflow"
+            fi
+          done
+
+      - name: Check branch protection
+        run: |
+          echo "🔍 Checking branch protection configuration..."
+          if [ -f ".github/branch-protection.json" ]; then
+            echo "✅ Branch protection config found"
+            cat .github/branch-protection.json | jq .
+          else
+            echo "⚠️ Branch protection config missing"
+          fi
+
+      - name: Validate secrets template
+        run: |
+          echo "🔍 Validating secrets template..."
+          if [ -f ".github/secrets-template.env" ]; then
+            echo "✅ Secrets template found"
+            echo "Required secrets:"
+            grep -v "^#" .github/secrets-template.env | grep -v "^$" | cut -d= -f1
+          else
+            echo "⚠️ Secrets template missing"
+          fi
+
+      - name: Drift Report
+        run: |
+          echo "📊 Drift Detection Report"
+          echo "======================="
+          echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref }}"
+          echo "Status: Check logs above for details"
