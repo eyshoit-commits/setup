@@ -735,13 +735,13 @@ function log_status() {
   local version=$2
   local path=$3
   local status=$4
-  
+
   case $status in
     installed) echo -e "${GREEN}✅ $tool ($version) - INSTALLED${NC}"; ((INSTALLED++)) ;;
     skipped) echo -e "${YELLOW}⏭️  $tool ($version) - SKIPPED${NC}"; ((SKIPPED++)) ;;
     failed) echo -e "${RED}❌ $tool - FAILED${NC}"; ((FAILED++)) ;;
   esac
-  
+
   # Append to report (check if jq is available)
   if command -v jq &>/dev/null; then
     jq --arg name "$tool" \
@@ -792,10 +792,10 @@ else
     bash /tmp/nvm-install.sh
     rm /tmp/nvm-install.sh
   fi
-  
+
   export NVM_DIR="$HOME/.nvm"
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  
+
   log_status "nvm" "$NVM_VERSION" "$HOME/.nvm" "installed"
 fi
 
@@ -831,7 +831,7 @@ if [ -d "$HOME/miniconda3" ]; then
   log_status "conda" "$CURRENT_CONDA" "$HOME/miniconda3" "skipped"
 else
   OS_TYPE="$(uname -s)"
-  
+
   if [ "$OFFLINE_MODE" = true ] && [ -f "$REPO_ROOT/artifacts/miniconda.sh" ]; then
     bash "$REPO_ROOT/artifacts/miniconda.sh" -b -p "$HOME/miniconda3"
   else
@@ -847,14 +847,14 @@ else
         fi
         ;;
     esac
-    
+
     bash /tmp/miniconda.sh -b -p "$HOME/miniconda3"
     rm /tmp/miniconda.sh
   fi
-  
+
   "$HOME/miniconda3/bin/conda" init bash 2>/dev/null || true
   [ -f "$HOME/.zshrc" ] && "$HOME/miniconda3/bin/conda" init zsh 2>/dev/null || true
-  
+
   CONDA_VER=$("$HOME/miniconda3/bin/conda" --version 2>/dev/null | awk '{print $2}' || echo "unknown")
   log_status "conda" "$CONDA_VER" "$HOME/miniconda3" "installed"
 fi
@@ -880,9 +880,9 @@ else
     sh /tmp/uv-install.sh
     rm /tmp/uv-install.sh
   fi
-  
+
   export PATH="$HOME/.cargo/bin:$PATH"
-  
+
   UV_VER=$(uv --version 2>/dev/null | awk '{print $2}' || echo "unknown")
   log_status "uv" "$UV_VER" "$HOME/.cargo/bin/uv" "installed"
 fi
@@ -908,7 +908,7 @@ else
   else
     npm install -g "pnpm@$PNPM_VERSION"
   fi
-  
+
   PNPM_VER=$(pnpm --version 2>/dev/null || echo "unknown")
   log_status "pnpm" "$PNPM_VER" "$(which pnpm)" "installed"
 fi
@@ -932,9 +932,9 @@ else
     sh /tmp/rustup-init.sh -y
     rm /tmp/rustup-init.sh
   fi
-  
+
   source "$HOME/.cargo/env"
-  
+
   RUST_VER=$(rustc --version 2>/dev/null | awk '{print $2}' || echo "unknown")
   log_status "rust" "$RUST_VER" "$HOME/.cargo" "installed"
 fi
@@ -977,7 +977,7 @@ if command -v pre-commit &> /dev/null && [ -f "$REPO_ROOT/config/pre-commit-conf
   if [ ! -f "$REPO_ROOT/.pre-commit-config.yaml" ]; then
     cp "$REPO_ROOT/config/pre-commit-config.yaml" "$REPO_ROOT/.pre-commit-config.yaml"
   fi
-  
+
   cd "$REPO_ROOT"
   pre-commit install 2>/dev/null || echo -e "${YELLOW}⚠️  Could not install pre-commit hooks${NC}"
   echo -e "${GREEN}✅ pre-commit hooks installed${NC}"

@@ -8,7 +8,7 @@ echo "🔧 Setting up Pre-Commit Hooks..."
 # Check if pre-commit is installed
 if ! command -v pre-commit &>/dev/null; then
     echo "📦 Installing pre-commit..."
-    
+
     if command -v pip3 &>/dev/null; then
         pip3 install pre-commit
     elif command -v pip &>/dev/null; then

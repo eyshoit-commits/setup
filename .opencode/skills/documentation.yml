@@ -33,14 +33,14 @@ sections:
       - prerequisites
       - step-by-step-guide
       - troubleshooting
-  
+
   security:
     file: "docs/SECURITY.md"
     content:
       - security-features
       - vulnerability-reporting
       - security-best-practices
-  
+
   troubleshooting:
     file: "docs/TROUBLESHOOTING.md"
     content:

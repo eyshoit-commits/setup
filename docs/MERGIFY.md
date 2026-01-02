@@ -286,7 +286,7 @@ pull_request_rules:
 queue:
   commit_message_template: |
     {{ title }} (#{{ number }})
-    
+
     {{ body }}
 ```
 
@@ -300,7 +300,7 @@ queue:
   actions:
     queue:
       priority: high
-      
+
 # Niedrige Priorität für Dependencies
 - name: Low priority for dependencies
   conditions:
@@ -624,7 +624,7 @@ pull_request_rules:
 queue:
   commit_message_template: |
     {{ title }} (#{{ number }})
-    
+
     {{ body }}
 ```
 
@@ -638,7 +638,7 @@ queue:
   actions:
     queue:
       priority: high
-      
+
 # Low priority for dependencies
 - name: Low priority for dependencies
   conditions:

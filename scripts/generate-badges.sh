@@ -30,14 +30,14 @@ fi
 
 if ! command -v jq &> /dev/null; then
   echo -e "${YELLOW}⚠️  jq not found - generating basic badges${NC}"
-  
+
   cat > README-badges.md <<EOF
 <!-- Auto-generated badges from setup-report.json -->
 ![Status](https://img.shields.io/badge/setup-unknown-lightgrey)
 ![OS](https://img.shields.io/badge/os-unknown-blue)
 ![Arch](https://img.shields.io/badge/arch-unknown-blue)
 EOF
-  
+
   echo -e "${GREEN}✅ Basic badges generated in README-badges.md${NC}"
   exit 0
 fi

@@ -307,22 +307,22 @@ function Log-Status {
 
     $Rep = Get-Content $ReportFile | ConvertFrom-Json
     $Rep.tools += @{
-    
+
     switch ($Status) {
-        "installed" { 
+        "installed" {
             Write-Host "✅ $Tool ($Version) - INSTALLED" -ForegroundColor Green
             $script:INSTALLED++
         }
-        "skipped" { 
+        "skipped" {
             Write-Host "⏭️  $Tool ($Version) - SKIPPED" -ForegroundColor Yellow
             $script:SKIPPED++
         }
-        "failed" { 
+        "failed" {
             Write-Host "❌ $Tool - FAILED" -ForegroundColor Red
             $script:FAILED++
         }
     }
-    
+
     # Add to report
     $script:reportData.tools += @{
         name = $Tool

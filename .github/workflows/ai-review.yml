@@ -9,7 +9,7 @@ jobs:
   coderabbit:
     name: CodeRabbit Review
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
   codiumai:
     name: CodiumAI PR Agent
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
     name: AI Review Summary
     runs-on: ubuntu-latest
     needs: [coderabbit, codiumai]
-    
+
     steps:
       - name: Summary
         run: |

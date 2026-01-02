@@ -23,7 +23,7 @@ fi
 
 # Conventional Commits pattern
 # type(scope): description
-# 
+#
 # Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
 pattern="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+"
 

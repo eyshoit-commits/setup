@@ -44,10 +44,10 @@
 
 ## 📚 Overview / Übersicht
 
-**English:**  
+**English:**
 This repository provides a complete enterprise setup with integrated GitHub Marketplace apps, automated workflows, OpenCode agents, and MCP (Model Context Protocol) server integration. It includes comprehensive security scanning, code quality checks, AI-powered code reviews, automated testing, and **fully automated PR fixes and reviews**.
 
-**Deutsch:**  
+**Deutsch:**
 Dieses Repository bietet ein vollständiges Enterprise-Setup mit integrierten GitHub Marketplace Apps, automatisierten Workflows, OpenCode Agents und MCP (Model Context Protocol) Server-Integration. Es umfasst umfassende Sicherheitsscans, Code-Qualitätsprüfungen, KI-gestützte Code-Reviews, automatisierte Tests und **vollautomatische PR-Fixes und Reviews**.
 
 ---

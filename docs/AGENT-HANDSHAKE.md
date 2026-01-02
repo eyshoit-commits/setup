@@ -163,7 +163,7 @@ with open('agent-handshake.json') as f:
 if handshake['setup_status'] == 'success':
     # Environment is ready
     toolchains = {t['name']: t for t in handshake['toolchains']}
-    
+
     if 'python' in toolchains and toolchains['python']['available']:
         # Can execute Python tasks
         python_version = toolchains['python']['version']
@@ -179,7 +179,7 @@ const handshake = require('./agent-handshake.json');
 
 function routeTask(taskType) {
   const role = handshake.roles.find(r => r.name === taskType);
-  
+
   if (role && role.ready) {
     return role.agent; // e.g., "backend-agent"
   } else if (role) {
@@ -221,12 +221,12 @@ tasks:
     if: .roles[] | select(.name=="backend").ready
     agent: backend-agent
     command: uvx cookiecutter python-project
-  
+
   - name: init-frontend
     if: .roles[] | select(.name=="frontend").ready
     agent: frontend-agent
     command: pnpm create vite
-  
+
   - name: setup-ci
     if: .capabilities.can_deploy
     agent: devops-agent
@@ -303,7 +303,7 @@ jobs:
         run: |
           echo "backend=$(jq -r '.capabilities.can_build_backend' agent-handshake.json)" >> $GITHUB_OUTPUT
           echo "frontend=$(jq -r '.capabilities.can_build_frontend' agent-handshake.json)" >> $GITHUB_OUTPUT
-  
+
   build-backend:
     needs: check-environment
     if: needs.check-environment.outputs.can-build-backend == 'true'
@@ -311,7 +311,7 @@ jobs:
     steps:
       - name: Build backend
         run: echo "Building backend..."
-  
+
   build-frontend:
     needs: check-environment
     if: needs.check-environment.outputs.can-build-frontend == 'true'

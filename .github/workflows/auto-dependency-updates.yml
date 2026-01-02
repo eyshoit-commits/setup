@@ -15,7 +15,7 @@ jobs:
     name: Auto-merge Dependabot PRs
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
-    
+
     steps:
       - name: Dependabot metadata
         id: metadata
@@ -46,7 +46,7 @@ jobs:
   npm-updates:
     name: NPM Dependency Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -77,19 +77,19 @@ jobs:
           title: "⬆️ Automated NPM Dependency Updates"
           body: |
             ## 📦 Dependency Updates verfügbar
-            
+
             Dieser PR wurde automatisch erstellt um NPM-Dependencies zu aktualisieren.
-            
+
             ### 🔍 Änderungen prüfen
             ```bash
             npm outdated
             ```
-            
+
             ### ✅ Nach Merge
             - [ ] Tests ausführen
             - [ ] Smoke-Tests validieren
             - [ ] CHANGELOG aktualisieren
-            
+
             ---
             🤖 Erstellt von GitHub Actions
           branch: automated/npm-updates
@@ -99,7 +99,7 @@ jobs:
   python-updates:
     name: Python Dependency Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -132,12 +132,12 @@ jobs:
           title: "⬆️ Automated Python Dependency Updates"
           body: |
             ## 🐍 Python Dependency Updates
-            
+
             Automatische Aktualisierung der Python-Dependencies.
-            
+
             ### Geänderte Datei
             - `config/requirements.txt`
-            
+
             ---
             🤖 Erstellt von GitHub Actions
           branch: automated/python-updates

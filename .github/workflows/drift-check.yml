@@ -11,7 +11,7 @@ jobs:
   infrastructure-drift:
     name: Infrastructure Drift Detection
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,7 +19,7 @@ jobs:
       - name: Check configuration drift
         run: |
           echo "🔍 Checking for infrastructure drift..."
-          
+
           # Check if expected files are present
           EXPECTED_FILES=(
             ".github/workflows/setup-validation.yml"
@@ -40,7 +40,7 @@ jobs:
             ".github/branch-protection.json"
             ".github/secrets-template.env"
           )
-          
+
           DRIFT=0
           for file in "${EXPECTED_FILES[@]}"; do
             if [ ! -f "$file" ]; then
@@ -48,7 +48,7 @@ jobs:
               DRIFT=1
             fi
           done
-          
+
           if [ $DRIFT -eq 1 ]; then
             echo "⚠️ Configuration drift detected"
           else
@@ -58,7 +58,7 @@ jobs:
       - name: Validate workflow configurations
         run: |
           echo "🔍 Validating workflow configurations..."
-          
+
           for workflow in .github/workflows/*.yml; do
             if ! grep -q "workflow_dispatch" "$workflow"; then
               echo "⚠️ Workflow missing manual trigger: $workflow"

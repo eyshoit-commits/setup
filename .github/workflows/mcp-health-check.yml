@@ -11,7 +11,7 @@ jobs:
   mcp-health:
     name: MCP Server Health Monitoring
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -38,7 +38,7 @@ jobs:
           if [ -f "mcp/config.json" ]; then
             # Check JSON validity
             cat mcp/config.json | jq . > /dev/null && echo "✅ Valid JSON" || exit 1
-            
+
             # Check for required fields
             if cat mcp/config.json | jq -e '.mcpServers' > /dev/null; then
               echo "✅ mcpServers field present"
@@ -53,7 +53,7 @@ jobs:
           echo "🔗 Testing MCP server connections..."
           echo "Note: This is a configuration validation"
           echo "Actual server connections require runtime environment"
-          
+
           if [ -f "mcp/config.json" ]; then
             servers=$(cat mcp/config.json | jq -r '.mcpServers | keys[]')
             for server in $servers; do

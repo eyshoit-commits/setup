@@ -5,7 +5,7 @@ $RepoRoot = Split-Path -Parent $ScriptDir
 
 $FAILED = 0
 
-Write-Host "Running smoke tests..." 
+Write-Host "Running smoke tests..."
 Write-Host ""
 
 # Node
@@ -54,14 +54,14 @@ if (Get-Command pnpm -ErrorAction SilentlyContinue) {
 $ReportFile = Join-Path $RepoRoot "setup-report.json"
 if (Test-Path $ReportFile) {
     $report = Get-Content $ReportFile | ConvertFrom-Json
-    
+
     $report | Add-Member -NotePropertyName smoke_tests -NotePropertyValue @{
         node = if (Get-Command node -ErrorAction SilentlyContinue) { "passed" } else { "failed" }
         python = if ((Get-Command uvx -ErrorAction SilentlyContinue) -and (uvx ruff --version 2>$null)) { "passed" } else { "failed" }
         rust = if (Get-Command cargo -ErrorAction SilentlyContinue) { "passed" } else { "failed" }
         pnpm = if (Get-Command pnpm -ErrorAction SilentlyContinue) { "passed" } else { "failed" }
     } -Force
-    
+
     $report | ConvertTo-Json -Depth 10 | Set-Content $ReportFile
 }
 

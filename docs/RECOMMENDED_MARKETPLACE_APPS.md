@@ -432,7 +432,7 @@ codecov:
   steps:
     - name: Run tests with coverage
       run: npm run test -- --coverage
-    
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
@@ -654,7 +654,7 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
-    
+
   # npm
   - package-ecosystem: "npm"
     directory: "/"
@@ -664,7 +664,7 @@ updates:
       - "dependencies"
       - "npm"
     versioning-strategy: increase
-    
+
   # Python
   - package-ecosystem: "pip"
     directory: "/"
@@ -1263,7 +1263,7 @@ codecov:
   steps:
     - name: Run tests with coverage
       run: npm run test -- --coverage
-    
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
@@ -1485,7 +1485,7 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
-    
+
   # npm
   - package-ecosystem: "npm"
     directory: "/"
@@ -1495,7 +1495,7 @@ updates:
       - "dependencies"
       - "npm"
     versioning-strategy: increase
-    
+
   # Python
   - package-ecosystem: "pip"
     directory: "/"
@@ -1687,6 +1687,6 @@ gh api rate_limit
 
 ---
 
-**Last Updated:** 2026-01-02  
-**Version:** 1.0.0  
+**Last Updated:** 2026-01-02
+**Version:** 1.0.0
 **Maintained By:** Enterprise Setup Team
