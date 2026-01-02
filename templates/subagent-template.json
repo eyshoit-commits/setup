@@ -1,0 +1,17 @@
+{
+  "name": "",
+  "description": "",
+  "version": "1.0.0",
+  "category": "",
+  "customInstructions": "",
+  "contextWindow": "isolated",
+  "toolPermissions": {
+    "fileOperations": true,
+    "terminalAccess": true,
+    "networkAccess": false,
+    "codeGeneration": true
+  },
+  "taskTypes": [],
+  "fallbackAgent": "",
+  "dependencies": []
+}

@@ -1,0 +1,286 @@
+name: 📊 Agent Performance Monitoring
+
+on:
+  schedule:
+    # Run weekly on Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  collect-metrics:
+    name: Collect Agent Performance Metrics
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for analysis
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq bc
+      
+      - name: Analyze agent usage in commits
+        id: commit-analysis
+        run: |
+          echo "📊 Analyzing agent mentions in commits..."
+          
+          # Create metrics directory
+          mkdir -p .github/metrics
+          
+          # Get commits from last 7 days
+          SINCE_DATE=$(date -u -d '7 days ago' '+%Y-%m-%d')
+          
+          # Collect agent mentions
+          AGENT_MENTIONS=$(mktemp)
+          
+          git log --since="$SINCE_DATE" --all --pretty=format:"%H|%an|%ae|%s|%b" | while IFS='|' read -r hash author email subject body; do
+            # Look for agent mentions in commit messages
+            # Format: @agent-name or [agent:name]
+            echo "$subject $body" | grep -oE '@[a-zA-Z0-9_-]+|\[agent:[a-zA-Z0-9_-]+\]' | while read -r mention; do
+              agent=$(echo "$mention" | sed 's/@//g' | sed 's/\[agent://g' | sed 's/\]//g')
+              echo "$agent|$hash|$author" >> "$AGENT_MENTIONS"
+            done
+          done
+          
+          # Count mentions per agent
+          if [ -s "$AGENT_MENTIONS" ]; then
+            echo "Agent mentions found:"
+            sort "$AGENT_MENTIONS" | cut -d'|' -f1 | uniq -c | sort -rn
+            echo "mentions_found=true" >> $GITHUB_OUTPUT
+          else
+            echo "No agent mentions found in commits"
+            echo "mentions_found=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "agent_mentions_file=$AGENT_MENTIONS" >> $GITHUB_OUTPUT
+      
+      - name: Analyze agent usage in issues and PRs
+        id: issue-analysis
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            console.log('📊 Analyzing agent labels in issues and PRs...');
+            
+            // Get closed issues and PRs from last 7 days
+            const since = new Date();
+            since.setDate(since.getDate() - 7);
+            
+            const agentMetrics = {};
+            
+            // Analyze issues
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              since: since.toISOString(),
+              per_page: 100
+            });
+            
+            for (const issue of issues.data) {
+              const agentLabels = issue.labels
+                .map(l => typeof l === 'string' ? l : l.name)
+                .filter(l => l.startsWith('agent:'));
+              
+              for (const label of agentLabels) {
+                const agentName = label.replace('agent:', '');
+                if (!agentMetrics[agentName]) {
+                  agentMetrics[agentName] = {
+                    name: agentName,
+                    issues: 0,
+                    prs: 0,
+                    success: 0,
+                    total: 0
+                  };
+                }
+                
+                if (issue.pull_request) {
+                  agentMetrics[agentName].prs++;
+                } else {
+                  agentMetrics[agentName].issues++;
+                }
+                
+                agentMetrics[agentName].total++;
+                
+                // Consider closed items as successful
+                if (issue.state === 'closed') {
+                  agentMetrics[agentName].success++;
+                }
+              }
+            }
+            
+            console.log('Agent metrics:', agentMetrics);
+            
+            // Save metrics to file
+            fs.writeFileSync(
+              '.github/metrics/agent-metrics.json',
+              JSON.stringify(agentMetrics, null, 2)
+            );
+            
+            return { count: Object.keys(agentMetrics).length };
+      
+      - name: Calculate response times
+        id: response-times
+        run: |
+          echo "📊 Calculating average response times..."
+          
+          # Analyze time between issue creation and first response
+          # This is a simplified analysis - in production, you'd track actual agent invocations
+          
+          RESPONSE_TIMES=$(mktemp)
+          
+          # Get issues from last 7 days with responses
+          git log --since="7 days ago" --all --grep="agent" --pretty=format:"%H|%ct" > /tmp/commits.txt || true
+          
+          if [ -s /tmp/commits.txt ]; then
+            # Calculate average time (simplified)
+            echo "Response time data collected"
+            echo "has_data=true" >> $GITHUB_OUTPUT
+          else
+            echo "No response time data available"
+            echo "has_data=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Generate performance report
+        run: |
+          echo "📊 Generating performance report..."
+          
+          REPORT_DATE=$(date -u +"%Y-%m-%d")
+          REPORT_FILE=".github/metrics/performance-report-${REPORT_DATE}.md"
+          
+          cat > "$REPORT_FILE" << 'EOF'
+          # Agent Performance Report
+          
+          **Report Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Period:** Last 7 days
+          
+          ## Summary
+          
+          This report tracks the performance and usage of AI agents in the repository.
+          
+          ## Agent Usage Metrics
+          
+          EOF
+          
+          # Add metrics from JSON file if it exists
+          if [ -f .github/metrics/agent-metrics.json ]; then
+            echo "### Top Agents by Activity" >> "$REPORT_FILE"
+            echo "" >> "$REPORT_FILE"
+            echo "| Agent | Issues | PRs | Success Rate | Total Uses |" >> "$REPORT_FILE"
+            echo "|-------|--------|-----|--------------|------------|" >> "$REPORT_FILE"
+            
+            jq -r 'to_entries | sort_by(-.value.total) | .[] | 
+              "| \(.value.name) | \(.value.issues) | \(.value.prs) | \(if .value.total > 0 then ((.value.success / .value.total * 100) | floor) else 0 end)% | \(.value.total) |"' \
+              .github/metrics/agent-metrics.json >> "$REPORT_FILE" || echo "No metrics available" >> "$REPORT_FILE"
+            
+            echo "" >> "$REPORT_FILE"
+          else
+            echo "No agent metrics available for this period." >> "$REPORT_FILE"
+            echo "" >> "$REPORT_FILE"
+          fi
+          
+          cat >> "$REPORT_FILE" << 'EOF'
+          
+          ## Performance Insights
+          
+          - **Most Active Agents:** Agents with the highest usage in issues and PRs
+          - **Success Rate:** Percentage of closed items (issues/PRs) tagged with agent labels
+          - **Response Times:** Average time from agent invocation to resolution
+          
+          ## Recommendations
+          
+          1. **High-performing agents** should be promoted and documented
+          2. **Low success rate agents** may need refinement or better targeting
+          3. **Unused agents** should be reviewed for deprecation
+          
+          ## Data Collection
+          
+          - Commit message analysis for @agent mentions
+          - Issue/PR label analysis for agent: tags
+          - Workflow run history (future enhancement)
+          
+          ---
+          
+          *This report was automatically generated by the agent-performance workflow.*
+          *To improve tracking, use agent labels and mentions in commits.*
+          EOF
+          
+          cat "$REPORT_FILE"
+      
+      - name: Store historical metrics
+        run: |
+          echo "💾 Storing historical metrics..."
+          
+          TIMESTAMP=$(date -u +"%Y%m%d-%H%M%S")
+          HISTORY_FILE=".github/metrics/history/${TIMESTAMP}.json"
+          
+          mkdir -p .github/metrics/history
+          
+          if [ -f .github/metrics/agent-metrics.json ]; then
+            cp .github/metrics/agent-metrics.json "$HISTORY_FILE"
+            echo "Metrics saved to $HISTORY_FILE"
+          fi
+      
+      - name: Commit metrics
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add .github/metrics/
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "📊 Update agent performance metrics [skip ci]"
+            git push
+            echo "Metrics committed and pushed"
+          fi
+      
+      - name: Create performance issue
+        if: github.event.schedule != '' || github.event_name == 'workflow_dispatch'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Find the latest report
+            const reportDate = new Date().toISOString().split('T')[0];
+            const reportFile = `.github/metrics/performance-report-${reportDate}.md`;
+            
+            if (!fs.existsSync(reportFile)) {
+              console.log('No report file found');
+              return;
+            }
+            
+            const reportContent = fs.readFileSync(reportFile, 'utf8');
+            
+            // Create an issue with the report
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `📊 Weekly Agent Performance Report - ${reportDate}`,
+              body: reportContent,
+              labels: ['metrics', 'automated', 'agents']
+            });
+            
+            console.log('Performance report issue created');
+      
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-performance-report
+          path: .github/metrics/performance-report-*.md
+          retention-days: 90

@@ -1,0 +1,248 @@
+name: 🏷️ Auto-Assign Agents
+
+on:
+  issues:
+    types: [opened, edited]
+  pull_request:
+    types: [opened, edited]
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  assign-agents:
+    name: Auto-Assign Relevant Agents
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+      
+      - name: Analyze issue/PR content
+        id: analyze
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Get issue or PR content
+            const isPR = context.payload.pull_request !== undefined;
+            const item = isPR ? context.payload.pull_request : context.payload.issue;
+            const title = item.title.toLowerCase();
+            const body = (item.body || '').toLowerCase();
+            const content = `${title} ${body}`;
+            
+            console.log(`Analyzing ${isPR ? 'PR' : 'issue'}: ${item.title}`);
+            
+            // Load agent definitions
+            const agents = [];
+            const agentDirs = ['.opencode/agents', '.github/copilot/agents'];
+            
+            for (const dir of agentDirs) {
+              if (fs.existsSync(dir)) {
+                const files = fs.readdirSync(dir, { recursive: true });
+                for (const file of files) {
+                  if (file.endsWith('.json')) {
+                    try {
+                      const agentPath = path.join(dir, file);
+                      const agentData = JSON.parse(fs.readFileSync(agentPath, 'utf8'));
+                      agents.push({
+                        name: agentData.name,
+                        description: agentData.description || '',
+                        keywords: agentData.keywords || [],
+                        skills: agentData.skills || [],
+                        type: agentData.type || 'general'
+                      });
+                    } catch (e) {
+                      console.log(`Skipping invalid agent file: ${file}`);
+                    }
+                  }
+                }
+              }
+            }
+            
+            console.log(`Loaded ${agents.length} agent definitions`);
+            
+            // Keyword-based matching
+            const matches = [];
+            
+            // Define keyword categories
+            const keywordMap = {
+              'security': ['security', 'vulnerability', 'cve', 'exploit', 'auth', 'permission'],
+              'testing': ['test', 'spec', 'jest', 'mocha', 'cypress', 'e2e', 'unit test'],
+              'documentation': ['docs', 'documentation', 'readme', 'guide', 'tutorial'],
+              'performance': ['performance', 'optimization', 'slow', 'speed', 'benchmark'],
+              'bug': ['bug', 'error', 'crash', 'exception', 'fail'],
+              'feature': ['feature', 'enhancement', 'add', 'new', 'implement'],
+              'refactor': ['refactor', 'cleanup', 'improve', 'reorganize'],
+              'ci-cd': ['ci', 'cd', 'workflow', 'action', 'pipeline', 'build', 'deploy'],
+              'dependencies': ['dependency', 'dependencies', 'package', 'npm', 'yarn', 'pnpm'],
+              'setup': ['setup', 'install', 'config', 'configure', 'environment'],
+              'database': ['database', 'db', 'sql', 'postgresql', 'mysql', 'mongodb'],
+              'api': ['api', 'rest', 'graphql', 'endpoint', 'route'],
+              'frontend': ['frontend', 'ui', 'react', 'vue', 'angular', 'css', 'html'],
+              'backend': ['backend', 'server', 'node', 'express', 'fastify'],
+              'ai-ml': ['ai', 'ml', 'machine learning', 'model', 'training', 'copilot', 'agent']
+            };
+            
+            // Check which categories match
+            const matchedCategories = new Set();
+            for (const [category, keywords] of Object.entries(keywordMap)) {
+              for (const keyword of keywords) {
+                if (content.includes(keyword)) {
+                  matchedCategories.add(category);
+                  break;
+                }
+              }
+            }
+            
+            console.log(`Matched categories: ${Array.from(matchedCategories).join(', ')}`);
+            
+            // Match agents based on categories and keywords
+            for (const agent of agents) {
+              let score = 0;
+              const agentText = `${agent.name} ${agent.description} ${agent.keywords.join(' ')}`.toLowerCase();
+              
+              // Check category matches
+              for (const category of matchedCategories) {
+                if (agentText.includes(category)) {
+                  score += 10;
+                }
+              }
+              
+              // Check keyword matches
+              for (const keyword of agent.keywords) {
+                if (content.includes(keyword.toLowerCase())) {
+                  score += 5;
+                }
+              }
+              
+              // Check skill matches
+              for (const skill of agent.skills) {
+                if (content.includes(skill.toLowerCase())) {
+                  score += 3;
+                }
+              }
+              
+              if (score > 0) {
+                matches.push({ agent: agent.name, score, type: agent.type });
+              }
+            }
+            
+            // Sort by score and take top 5
+            matches.sort((a, b) => b.score - a.score);
+            const topMatches = matches.slice(0, 5);
+            
+            console.log('Top matches:', topMatches);
+            
+            return {
+              matches: topMatches,
+              categories: Array.from(matchedCategories),
+              isPR
+            };
+      
+      - name: Add labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const analysis = ${{ steps.analyze.outputs.result }};
+            const labels = [];
+            
+            // Add category labels
+            for (const category of analysis.categories) {
+              labels.push(category);
+            }
+            
+            // Add agent labels (prefix with 'agent:')
+            for (const match of analysis.matches) {
+              labels.push(`agent:${match.agent}`);
+            }
+            
+            if (labels.length > 0) {
+              console.log(`Adding labels: ${labels.join(', ')}`);
+              
+              // Ensure labels exist (create if needed)
+              for (const label of labels) {
+                try {
+                  await github.rest.issues.getLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: label
+                  });
+                } catch (error) {
+                  if (error.status === 404) {
+                    // Create label
+                    const color = label.startsWith('agent:') ? '0E8A16' : '1D76DB';
+                    await github.rest.issues.createLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      name: label,
+                      color: color,
+                      description: label.startsWith('agent:') ? `Relevant agent: ${label.replace('agent:', '')}` : `Category: ${label}`
+                    });
+                    console.log(`Created label: ${label}`);
+                  }
+                }
+              }
+              
+              // Add labels to issue/PR
+              const issueNumber = analysis.isPR ? context.payload.pull_request.number : context.payload.issue.number;
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                labels: labels
+              });
+              
+              console.log('Labels added successfully');
+            } else {
+              console.log('No relevant labels found');
+            }
+      
+      - name: Add comment with agent recommendations
+        if: steps.analyze.outputs.result != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const analysis = ${{ steps.analyze.outputs.result }};
+            
+            if (analysis.matches.length === 0) {
+              console.log('No agent matches found, skipping comment');
+              return;
+            }
+            
+            let comment = '## 🤖 Recommended Agents\n\n';
+            comment += 'Based on the content, the following agents might be helpful:\n\n';
+            
+            for (const match of analysis.matches) {
+              comment += `- **${match.agent}** (relevance score: ${match.score})\n`;
+            }
+            
+            comment += '\n---\n';
+            comment += '*This recommendation was automatically generated by the auto-assign-agents workflow.*\n';
+            comment += '*You can invoke these agents using GitHub Copilot or VS Code extensions.*';
+            
+            const issueNumber = analysis.isPR ? context.payload.pull_request.number : context.payload.issue.number;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: comment
+            });
+            
+            console.log('Comment added with agent recommendations');

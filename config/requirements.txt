@@ -1,4 +1,10 @@
-# Python dependencies for setup environment
-pre-commit>=3.5.0
-pip-audit>=2.6.0
-ruff>=0.1.15
+# Python dependencies
+# Add your Python project dependencies here
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Code Quality
+ruff>=0.1.0
+pylint>=3.0.0

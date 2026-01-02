@@ -1,4 +1,5 @@
 name: CodeRabbit AI Review
+
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -6,9 +7,11 @@ on:
 jobs:
   coderabbit:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
     steps:
-      - uses: actions/checkout@v4
       - name: CodeRabbit Review
         uses: coderabbitai/coderabbit-action@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}

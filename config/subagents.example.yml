@@ -1,0 +1,57 @@
+# Subagents Configuration Example
+# 
+# This file defines all subagents to be generated.
+# Each subagent is generated from templates/subagent-template.json
+
+version: "1.0.0"
+
+categories:
+  - id: "01-core-development"
+    name: "Core Development"
+    agents: []
+  
+  - id: "02-language-specialists"
+    name: "Language Specialists"
+    agents: []
+  
+  - id: "03-infrastructure"
+    name: "Infrastructure"
+    agents: []
+  
+  - id: "04-quality-security"
+    name: "Quality & Security"
+    agents: []
+  
+  - id: "05-data-ai"
+    name: "Data & AI"
+    agents: []
+  
+  - id: "06-developer-experience"
+    name: "Developer Experience"
+    agents: []
+  
+  - id: "07-specialized-domains"
+    name: "Specialized Domains"
+    agents: []
+  
+  - id: "08-business-product"
+    name: "Business & Product"
+    agents: []
+  
+  - id: "09-meta-orchestration"
+    name: "Meta & Orchestration"
+    agents: []
+  
+  - id: "10-research-analysis"
+    name: "Research & Analysis"
+    agents: []
+
+# Example agent definition:
+# agents:
+#   - name: "code-reviewer"
+#     description: "Reviews code for best practices and potential issues"
+#     category: "04-quality-security"
+#     customInstructions: "Focus on code quality, security, and maintainability"
+#     taskTypes: ["code-review", "security-audit"]
+#     fallbackAgent: "general-assistant"
+#     dependencies: ["syntax-checker", "security-scanner"]

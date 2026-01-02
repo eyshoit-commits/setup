@@ -1,0 +1,304 @@
+name: 🔄 Subagent Template Updates
+
+on:
+  schedule:
+    # Run monthly on the 1st at 3 AM UTC
+    - cron: '0 3 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-template-updates:
+    name: Check for Subagent Template Updates
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+      
+      - name: Check template repositories
+        id: check-templates
+        run: |
+          echo "🔍 Checking for template updates..."
+          
+          # Define template sources
+          declare -A TEMPLATES=(
+            ["copilot-agent"]="microsoft/copilot-agent-template"
+            ["opencode-skill"]="opencode/skill-template"
+            ["vscode-agent"]="microsoft/vscode-extension-samples"
+          )
+          
+          UPDATES_AVAILABLE=false
+          UPDATE_LIST=""
+          
+          for template in "${!TEMPLATES[@]}"; do
+            repo="${TEMPLATES[$template]}"
+            echo "Checking $template from $repo..."
+            
+            # Check if template repo exists and get latest commit
+            if gh api "repos/$repo" --jq '.html_url' &>/dev/null; then
+              LATEST_SHA=$(gh api "repos/$repo/commits/HEAD" --jq '.sha' 2>/dev/null || echo "")
+              
+              if [ -n "$LATEST_SHA" ]; then
+                # Check our tracking file
+                TRACKING_FILE=".opencode/templates/${template}.sha"
+                mkdir -p .opencode/templates
+                
+                if [ -f "$TRACKING_FILE" ]; then
+                  CURRENT_SHA=$(cat "$TRACKING_FILE")
+                  if [ "$CURRENT_SHA" != "$LATEST_SHA" ]; then
+                    echo "✨ Update available for $template"
+                    UPDATES_AVAILABLE=true
+                    UPDATE_LIST="${UPDATE_LIST}${template}:${repo}:${CURRENT_SHA}:${LATEST_SHA}\n"
+                    echo "$LATEST_SHA" > "$TRACKING_FILE"
+                  else
+                    echo "✓ No updates for $template"
+                  fi
+                else
+                  echo "📝 First time tracking $template"
+                  echo "$LATEST_SHA" > "$TRACKING_FILE"
+                  UPDATES_AVAILABLE=true
+                  UPDATE_LIST="${UPDATE_LIST}${template}:${repo}:new:${LATEST_SHA}\n"
+                fi
+              else
+                echo "⚠️  Could not fetch SHA for $repo"
+              fi
+            else
+              echo "⚠️  Template repository $repo not accessible"
+            fi
+          done
+          
+          if [ "$UPDATES_AVAILABLE" = true ]; then
+            echo "has_updates=true" >> $GITHUB_OUTPUT
+            echo -e "$UPDATE_LIST" > /tmp/updates.txt
+          else
+            echo "has_updates=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Analyze affected agents
+        if: steps.check-templates.outputs.has_updates == 'true'
+        id: analyze
+        run: |
+          echo "🔍 Analyzing which agents need updates..."
+          
+          AGENTS_TO_UPDATE=0
+          
+          # Count agents that might need updating
+          if [ -d .opencode/agents ]; then
+            AGENTS_TO_UPDATE=$(find .opencode/agents -type f -name "*.json" | wc -l)
+          fi
+          
+          if [ -d .github/copilot/agents ]; then
+            COPILOT_AGENTS=$(find .github/copilot/agents -type f -name "*.json" | wc -l)
+            AGENTS_TO_UPDATE=$((AGENTS_TO_UPDATE + COPILOT_AGENTS))
+          fi
+          
+          echo "Found $AGENTS_TO_UPDATE agents that may need updates"
+          echo "agent_count=$AGENTS_TO_UPDATE" >> $GITHUB_OUTPUT
+      
+      - name: Regenerate agents with new templates
+        if: steps.check-templates.outputs.has_updates == 'true'
+        run: |
+          echo "🔄 Regenerating agents with updated templates..."
+          
+          # Create a backup
+          BACKUP_DIR=".opencode/backups/agents-$(date +%Y%m%d)"
+          mkdir -p "$BACKUP_DIR"
+          
+          if [ -d .opencode/agents ]; then
+            cp -r .opencode/agents "$BACKUP_DIR/"
+            echo "✓ Backed up agents to $BACKUP_DIR"
+          fi
+          
+          # This is a placeholder - actual regeneration logic would depend on your template system
+          # For now, we'll just flag agents for manual review
+          
+          cat > .opencode/UPDATE_NEEDED.md << 'EOF'
+          # Agent Template Updates Available
+          
+          The following agent templates have been updated. Please review and regenerate affected agents:
+          
+          ## Updated Templates
+          
+          EOF
+          
+          if [ -f /tmp/updates.txt ]; then
+            while IFS=: read -r template repo old_sha new_sha; do
+              echo "- **$template** (from $repo)" >> .opencode/UPDATE_NEEDED.md
+              echo "  - Previous: \`$old_sha\`" >> .opencode/UPDATE_NEEDED.md
+              echo "  - Latest: \`$new_sha\`" >> .opencode/UPDATE_NEEDED.md
+              echo "" >> .opencode/UPDATE_NEEDED.md
+            done < /tmp/updates.txt
+          fi
+          
+          cat >> .opencode/UPDATE_NEEDED.md << 'EOF'
+          
+          ## Affected Agents
+          
+          Please review agents in:
+          - `.opencode/agents/`
+          - `.github/copilot/agents/`
+          
+          ## Next Steps
+          
+          1. Review template changes
+          2. Test updated templates
+          3. Regenerate agents as needed
+          4. Update agent documentation
+          
+          ---
+          
+          *This file was automatically generated by the subagent-updates workflow.*
+          EOF
+          
+          cat .opencode/UPDATE_NEEDED.md
+      
+      - name: Check for deprecated patterns
+        if: steps.check-templates.outputs.has_updates == 'true'
+        run: |
+          echo "🔍 Checking for deprecated patterns in agents..."
+          
+          DEPRECATED_PATTERNS=(
+            "old_api_version"
+            "deprecated_field"
+            "legacy_format"
+          )
+          
+          DEPRECATION_REPORT=".opencode/DEPRECATIONS.md"
+          
+          cat > "$DEPRECATION_REPORT" << 'EOF'
+          # Deprecation Report
+          
+          Agents using deprecated patterns:
+          
+          EOF
+          
+          FOUND_DEPRECATED=false
+          
+          for pattern in "${DEPRECATED_PATTERNS[@]}"; do
+            if [ -d .opencode/agents ]; then
+              MATCHES=$(grep -r "$pattern" .opencode/agents --include="*.json" || true)
+              if [ -n "$MATCHES" ]; then
+                echo "## Pattern: $pattern" >> "$DEPRECATION_REPORT"
+                echo '```' >> "$DEPRECATION_REPORT"
+                echo "$MATCHES" >> "$DEPRECATION_REPORT"
+                echo '```' >> "$DEPRECATION_REPORT"
+                echo "" >> "$DEPRECATION_REPORT"
+                FOUND_DEPRECATED=true
+              fi
+            fi
+          done
+          
+          if [ "$FOUND_DEPRECATED" = false ]; then
+            echo "✅ No deprecated patterns found" >> "$DEPRECATION_REPORT"
+          fi
+      
+      - name: Generate update script
+        if: steps.check-templates.outputs.has_updates == 'true'
+        run: |
+          echo "📝 Generating update helper script..."
+          
+          cat > .opencode/update-agents.sh << 'EOF'
+          #!/bin/bash
+          # Auto-generated agent update helper script
+          
+          set -e
+          
+          echo "🔄 Agent Update Helper"
+          echo "====================="
+          echo ""
+          echo "This script helps update agents to use the latest templates."
+          echo ""
+          
+          # Add your custom update logic here
+          # This is a template - customize based on your agent structure
+          
+          echo "✓ Update script ready"
+          echo ""
+          echo "Next steps:"
+          echo "1. Review UPDATE_NEEDED.md for details"
+          echo "2. Test updated templates in a branch"
+          echo "3. Run validation: bash scripts/validate.sh"
+          echo "4. Commit changes when ready"
+          EOF
+          
+          chmod +x .opencode/update-agents.sh
+      
+      - name: Create Pull Request
+        if: steps.check-templates.outputs.has_updates == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: subagent template updates available"
+          title: "🔄 Subagent Template Updates"
+          body: |
+            ## Subagent Template Updates
+            
+            This PR tracks updates to subagent templates and provides tools for regeneration.
+            
+            **Updated Templates:**
+            See `.opencode/UPDATE_NEEDED.md` for details
+            
+            **Affected Agents:** ${{ steps.analyze.outputs.agent_count }}
+            
+            **What's Included:**
+            - ✅ Template version tracking updates
+            - ✅ Update documentation (UPDATE_NEEDED.md)
+            - ✅ Deprecation report (if applicable)
+            - ✅ Update helper script
+            - ✅ Agent backups
+            
+            **Next Steps:**
+            1. Review the UPDATE_NEEDED.md file
+            2. Check the deprecation report
+            3. Run the update helper script: `bash .opencode/update-agents.sh`
+            4. Test updated agents
+            5. Update documentation as needed
+            
+            **Files Changed:**
+            - Template tracking files (`.opencode/templates/*.sha`)
+            - Update documentation
+            - Helper scripts
+            
+            ---
+            🤖 This PR was automatically created by the subagent-updates workflow.
+            
+            **Review Required:** Please carefully review template changes before regenerating agents.
+          branch: "auto-update/subagent-templates"
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
+            agents
+            templates
+      
+      - name: Create summary
+        if: always()
+        run: |
+          if [ "${{ steps.check-templates.outputs.has_updates }}" = "true" ]; then
+            echo "## ✨ Template Updates Available" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Found updates for subagent templates." >> $GITHUB_STEP_SUMMARY
+            echo "A PR has been created with update instructions." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Affected Agents:** ${{ steps.analyze.outputs.agent_count }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ✅ Templates Up to Date" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "All subagent templates are current." >> $GITHUB_STEP_SUMMARY
+          fi

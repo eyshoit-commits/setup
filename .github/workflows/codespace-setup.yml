@@ -5,6 +5,9 @@ on:
     branches: [main, develop]
   pull_request:
   workflow_dispatch:
+  # Trigger on codespace lifecycle events
+  codespace:
+    types: [created, started]
 
 jobs:
   setup-validation:
@@ -86,3 +89,138 @@ jobs:
         with:
           name: setup-report-macos
           path: setup-report.json
+
+  codespace-init:
+    name: Initialize Codespace Environment
+    runs-on: ubuntu-latest
+    if: github.event_name == 'codespace'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Display codespace info
+        run: |
+          echo "🚀 Setting up Codespace..."
+          echo "Event: ${{ github.event_name }}"
+          echo "Action: ${{ github.event.action }}"
+          echo "Codespace: ${{ github.event.codespace.name }}"
+      
+      - name: Install development tools
+        run: |
+          echo "📦 Installing development tools..."
+          
+          # Update package lists
+          sudo apt-get update
+          
+          # Install essential tools
+          sudo apt-get install -y \
+            git \
+            curl \
+            wget \
+            jq \
+            build-essential \
+            python3 \
+            python3-pip
+          
+          echo "✓ Base tools installed"
+      
+      - name: Run setup scripts
+        run: |
+          echo "🔧 Running setup scripts..."
+          
+          # Validate first
+          bash scripts/validate.sh
+          
+          # Run setup
+          bash scripts/setup.sh
+          
+          echo "✓ Setup complete"
+      
+      - name: Validate environment
+        run: |
+          echo "✅ Validating environment..."
+          
+          # Run smoke tests
+          bash scripts/smoke-test.sh
+          
+          echo "✓ Validation complete"
+      
+      - name: Generate agent handshake
+        run: |
+          echo "🤝 Generating agent handshake..."
+          
+          # Create MCP context if not exists
+          mkdir -p .mcp
+          
+          if [ ! -f .mcp/context.json ]; then
+            cat > .mcp/context.json << 'EOF'
+          {
+            "environment": "codespace",
+            "initialized": true,
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "tools_installed": true,
+            "agents_available": true
+          }
+          EOF
+          fi
+          
+          echo "✓ Agent handshake generated"
+      
+      - name: Setup VS Code extensions
+        run: |
+          echo "🔌 Configuring VS Code extensions..."
+          
+          # Create extensions file if it doesn't exist
+          mkdir -p .vscode
+          
+          if [ ! -f .vscode/extensions.json ]; then
+            cat > .vscode/extensions.json << 'EOF'
+          {
+            "recommendations": [
+              "github.copilot",
+              "github.copilot-chat",
+              "github.vscode-pull-request-github",
+              "dbaeumer.vscode-eslint",
+              "esbenp.prettier-vscode",
+              "eamodio.gitlens"
+            ]
+          }
+          EOF
+          fi
+          
+          echo "✓ VS Code extensions configured"
+      
+      - name: Display welcome message
+        run: |
+          cat << 'EOF'
+          
+          ╔════════════════════════════════════════════════════════════╗
+          ║                                                            ║
+          ║  🎉 Codespace Setup Complete!                              ║
+          ║                                                            ║
+          ║  Your development environment is ready.                    ║
+          ║                                                            ║
+          ║  📚 Documentation: docs/                                   ║
+          ║  🤖 Agents: .opencode/agents/                              ║
+          ║  🔧 Tools: Run `bash scripts/smoke-test.sh`                ║
+          ║                                                            ║
+          ║  Happy coding! 🚀                                          ║
+          ║                                                            ║
+          ╚════════════════════════════════════════════════════════════╝
+          
+          EOF
+      
+      - name: Upload setup report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: codespace-setup-report
+          path: setup-report.json
+      
+      - name: Upload MCP context
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: codespace-mcp-context
+          path: .mcp/context.json
