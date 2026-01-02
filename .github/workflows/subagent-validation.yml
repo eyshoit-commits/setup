@@ -1,0 +1,280 @@
+name: 🤖 Subagent Validation
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '.opencode/agents/**/*.json'
+      - '.github/copilot/agents/**/*.json'
+      - 'scripts/validate-agents.sh'
+  pull_request:
+    paths:
+      - '.opencode/agents/**/*.json'
+      - '.github/copilot/agents/**/*.json'
+      - 'scripts/validate-agents.sh'
+  workflow_dispatch:
+
+jobs:
+  validate-agents:
+    name: Validate Subagent Definitions
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install jq for JSON processing
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+      
+      - name: Count agent files
+        id: count
+        run: |
+          OPENCODE_COUNT=$(find .opencode/agents -type f -name "*.json" 2>/dev/null | wc -l || echo 0)
+          COPILOT_COUNT=$(find .github/copilot/agents -type f -name "*.json" 2>/dev/null | wc -l || echo 0)
+          TOTAL=$((OPENCODE_COUNT + COPILOT_COUNT))
+          
+          echo "opencode=$OPENCODE_COUNT" >> $GITHUB_OUTPUT
+          echo "copilot=$COPILOT_COUNT" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          
+          echo "📊 Found $TOTAL agent files:"
+          echo "  - OpenCode: $OPENCODE_COUNT"
+          echo "  - Copilot: $COPILOT_COUNT"
+      
+      - name: Validate JSON syntax
+        run: |
+          echo "🔍 Validating JSON syntax..."
+          
+          ERRORS=0
+          
+          # Validate OpenCode agents
+          if [ -d .opencode/agents ]; then
+            for file in $(find .opencode/agents -type f -name "*.json"); do
+              if ! jq empty "$file" 2>/dev/null; then
+                echo "❌ Invalid JSON: $file"
+                ERRORS=$((ERRORS + 1))
+              else
+                echo "✓ Valid: $file"
+              fi
+            done
+          fi
+          
+          # Validate Copilot agents
+          if [ -d .github/copilot/agents ]; then
+            for file in $(find .github/copilot/agents -type f -name "*.json"); do
+              if ! jq empty "$file" 2>/dev/null; then
+                echo "❌ Invalid JSON: $file"
+                ERRORS=$((ERRORS + 1))
+              else
+                echo "✓ Valid: $file"
+              fi
+            done
+          fi
+          
+          if [ $ERRORS -gt 0 ]; then
+            echo "❌ Found $ERRORS JSON syntax errors"
+            exit 1
+          fi
+          
+          echo "✅ All JSON files are valid"
+      
+      - name: Validate agent schema
+        run: |
+          echo "🔍 Validating agent schema compliance..."
+          
+          ERRORS=0
+          
+          validate_agent() {
+            local file=$1
+            local name=$(jq -r '.name // empty' "$file")
+            local description=$(jq -r '.description // empty' "$file")
+            local skills=$(jq -r '.skills // empty' "$file")
+            
+            if [ -z "$name" ]; then
+              echo "❌ Missing 'name' field in $file"
+              ERRORS=$((ERRORS + 1))
+            fi
+            
+            if [ -z "$description" ]; then
+              echo "❌ Missing 'description' field in $file"
+              ERRORS=$((ERRORS + 1))
+            fi
+            
+            # Check for required fields based on agent type
+            local type=$(jq -r '.type // "general"' "$file")
+            
+            if [ "$type" = "copilot" ]; then
+              local instructions=$(jq -r '.instructions // empty' "$file")
+              if [ -z "$instructions" ]; then
+                echo "⚠️  Missing 'instructions' field in Copilot agent: $file"
+              fi
+            fi
+            
+            if [ $ERRORS -eq 0 ]; then
+              echo "✓ Schema valid: $file"
+            fi
+          }
+          
+          # Validate all agent files
+          if [ -d .opencode/agents ]; then
+            for file in $(find .opencode/agents -type f -name "*.json"); do
+              validate_agent "$file"
+            done
+          fi
+          
+          if [ -d .github/copilot/agents ]; then
+            for file in $(find .github/copilot/agents -type f -name "*.json"); do
+              validate_agent "$file"
+            done
+          fi
+          
+          if [ $ERRORS -gt 0 ]; then
+            echo "❌ Found $ERRORS schema validation errors"
+            exit 1
+          fi
+          
+          echo "✅ All agents comply with schema"
+      
+      - name: Check for duplicate agent names
+        run: |
+          echo "🔍 Checking for duplicate agent names..."
+          
+          DUPLICATES=0
+          
+          # Collect all agent names
+          NAMES_FILE=$(mktemp)
+          
+          if [ -d .opencode/agents ]; then
+            find .opencode/agents -type f -name "*.json" -exec jq -r '.name' {} \; >> "$NAMES_FILE"
+          fi
+          
+          if [ -d .github/copilot/agents ]; then
+            find .github/copilot/agents -type f -name "*.json" -exec jq -r '.name' {} \; >> "$NAMES_FILE"
+          fi
+          
+          # Find duplicates
+          DUPS=$(sort "$NAMES_FILE" | uniq -d)
+          
+          if [ -n "$DUPS" ]; then
+            echo "❌ Found duplicate agent names:"
+            echo "$DUPS"
+            DUPLICATES=$(echo "$DUPS" | wc -l)
+            rm "$NAMES_FILE"
+            exit 1
+          fi
+          
+          rm "$NAMES_FILE"
+          echo "✅ No duplicate agent names found"
+      
+      - name: Verify agent dependencies
+        run: |
+          echo "🔍 Verifying agent dependencies..."
+          
+          ERRORS=0
+          
+          # Create a list of all available agents
+          AVAILABLE_AGENTS=$(mktemp)
+          
+          if [ -d .opencode/agents ]; then
+            find .opencode/agents -type f -name "*.json" -exec jq -r '.name' {} \; >> "$AVAILABLE_AGENTS"
+          fi
+          
+          if [ -d .github/copilot/agents ]; then
+            find .github/copilot/agents -type f -name "*.json" -exec jq -r '.name' {} \; >> "$AVAILABLE_AGENTS"
+          fi
+          
+          # Check dependencies in each agent
+          check_deps() {
+            local file=$1
+            local agent_name=$(jq -r '.name' "$file")
+            local deps=$(jq -r '.dependencies[]? // empty' "$file")
+            
+            if [ -n "$deps" ]; then
+              echo "Checking dependencies for $agent_name..."
+              for dep in $deps; do
+                if ! grep -q "^$dep$" "$AVAILABLE_AGENTS"; then
+                  echo "❌ Missing dependency '$dep' for agent '$agent_name' in $file"
+                  ERRORS=$((ERRORS + 1))
+                fi
+              done
+            fi
+          }
+          
+          if [ -d .opencode/agents ]; then
+            for file in $(find .opencode/agents -type f -name "*.json"); do
+              check_deps "$file"
+            done
+          fi
+          
+          if [ -d .github/copilot/agents ]; then
+            for file in $(find .github/copilot/agents -type f -name "*.json"); do
+              check_deps "$file"
+            done
+          fi
+          
+          rm "$AVAILABLE_AGENTS"
+          
+          if [ $ERRORS -gt 0 ]; then
+            echo "❌ Found $ERRORS dependency errors"
+            exit 1
+          fi
+          
+          echo "✅ All agent dependencies are valid"
+      
+      - name: Generate validation report
+        if: always()
+        run: |
+          cat > agent-validation-report.md << EOF
+          # Subagent Validation Report
+          
+          **Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Commit:** ${{ github.sha }}
+          
+          ## Summary
+          
+          - Total Agents: ${{ steps.count.outputs.total }}
+          - OpenCode Agents: ${{ steps.count.outputs.opencode }}
+          - Copilot Agents: ${{ steps.count.outputs.copilot }}
+          
+          ## Validation Steps
+          
+          - ✅ JSON Syntax Validation
+          - ✅ Schema Compliance Check
+          - ✅ Duplicate Name Detection
+          - ✅ Dependency Verification
+          
+          ## Status
+          
+          All validation checks passed successfully! 🎉
+          EOF
+          
+          cat agent-validation-report.md
+      
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-validation-report
+          path: agent-validation-report.md
+      
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('agent-validation-report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });

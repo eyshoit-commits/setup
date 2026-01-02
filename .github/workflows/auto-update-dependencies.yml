@@ -1,0 +1,234 @@
+name: 🔄 Auto-Update Dependencies
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-opencode-repos:
+    name: Update OpenCode Repo ${{ matrix.repo }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          - malhashemi/opencode-skills
+          - malhashemi/opencode-sessions
+          - shuv1337/oc-manager
+          - code-yeongyu/oh-my-opencode
+          - IgorWarzocha/Opencode-Roadmap
+          - zenobi-us/opencode-background
+          - Tarquinen/opencode-smart-title
+          - pantheon-org/opencode-warcraft-notifications
+          - IgorWarzocha/Opencode-Context-Analysis-Plugin
+          - shuv1337/oc-web
+          - ajaxdude/opencode-ai-poimandres-theme
+          - VoltAgent/awesome-claude-code-subagents
+          - darrenhinde/OpenAgents
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup GitHub CLI
+        run: |
+          if ! command -v gh &> /dev/null; then
+            echo "Installing GitHub CLI..."
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install gh -y
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Check for updates in ${{ matrix.repo }}
+        id: check
+        run: |
+          REPO="${{ matrix.repo }}"
+          REPO_SAFE=$(echo "$REPO" | sed 's/\//_/g')
+          
+          echo "Checking updates for $REPO..."
+          
+          # Get latest SHA from upstream repository
+          LATEST_SHA=$(gh api repos/$REPO/commits/HEAD --jq '.sha' 2>/dev/null || echo "")
+          
+          if [ -z "$LATEST_SHA" ]; then
+            echo "⚠️  Could not fetch latest SHA for $REPO (may be private or not exist)"
+            echo "has_update=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Latest SHA: $LATEST_SHA"
+          
+          # Check if we have a tracking file
+          TRACKING_FILE=".opencode/dependencies/${REPO_SAFE}.sha"
+          mkdir -p .opencode/dependencies
+          
+          if [ -f "$TRACKING_FILE" ]; then
+            CURRENT_SHA=$(cat "$TRACKING_FILE")
+            echo "Current SHA: $CURRENT_SHA"
+            
+            if [ "$CURRENT_SHA" = "$LATEST_SHA" ]; then
+              echo "✓ No updates needed for $REPO"
+              echo "has_update=false" >> $GITHUB_OUTPUT
+            else
+              echo "🔄 Update available for $REPO"
+              echo "$LATEST_SHA" > "$TRACKING_FILE"
+              echo "has_update=true" >> $GITHUB_OUTPUT
+              echo "repo=$REPO" >> $GITHUB_OUTPUT
+              echo "old_sha=$CURRENT_SHA" >> $GITHUB_OUTPUT
+              echo "new_sha=$LATEST_SHA" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "📝 First time tracking $REPO"
+            echo "$LATEST_SHA" > "$TRACKING_FILE"
+            echo "has_update=true" >> $GITHUB_OUTPUT
+            echo "repo=$REPO" >> $GITHUB_OUTPUT
+            echo "old_sha=initial" >> $GITHUB_OUTPUT
+            echo "new_sha=$LATEST_SHA" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Create Pull Request for ${{ matrix.repo }}
+        if: steps.check.outputs.has_update == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update ${{ steps.check.outputs.repo }} to ${{ steps.check.outputs.new_sha }}"
+          title: "🔄 Update ${{ steps.check.outputs.repo }}"
+          body: |
+            ## Dependency Update: ${{ steps.check.outputs.repo }}
+            
+            This PR updates the tracked version of `${{ steps.check.outputs.repo }}`.
+            
+            **Changes:**
+            - Previous SHA: `${{ steps.check.outputs.old_sha }}`
+            - New SHA: `${{ steps.check.outputs.new_sha }}`
+            
+            **Repository:** https://github.com/${{ steps.check.outputs.repo }}
+            
+            ---
+            🤖 This PR was automatically created by the auto-update-dependencies workflow.
+            
+            Please review the changes in the upstream repository before merging.
+          branch: "auto-update/${{ matrix.repo }}"
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
+            opencode
+
+  update-tool-versions:
+    name: Check Tool Version Updates
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Check nvm version
+        id: check-nvm
+        run: |
+          echo "Checking latest nvm version..."
+          LATEST_NVM=$(curl -fsSL https://api.github.com/repos/nvm-sh/nvm/releases/latest | jq -r .tag_name)
+          CURRENT_NVM=$(grep 'NVM_VERSION=' config/versions.env | cut -d'=' -f2 | tr -d '"')
+          
+          echo "Current: $CURRENT_NVM, Latest: $LATEST_NVM"
+          
+          if [ "$CURRENT_NVM" != "$LATEST_NVM" ]; then
+            echo "has_update=true" >> $GITHUB_OUTPUT
+            echo "current=$CURRENT_NVM" >> $GITHUB_OUTPUT
+            echo "latest=$LATEST_NVM" >> $GITHUB_OUTPUT
+          else
+            echo "has_update=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check pnpm version
+        id: check-pnpm
+        run: |
+          echo "Checking latest pnpm version..."
+          LATEST_PNPM=$(curl -fsSL https://api.github.com/repos/pnpm/pnpm/releases/latest | jq -r .tag_name | sed 's/^v//')
+          CURRENT_PNPM=$(grep 'PNPM_VERSION=' config/versions.env | cut -d'=' -f2 | tr -d '"')
+          
+          echo "Current: $CURRENT_PNPM, Latest: $LATEST_PNPM"
+          
+          if [ "$CURRENT_PNPM" != "$LATEST_PNPM" ]; then
+            echo "has_update=true" >> $GITHUB_OUTPUT
+            echo "current=$CURRENT_PNPM" >> $GITHUB_OUTPUT
+            echo "latest=$LATEST_PNPM" >> $GITHUB_OUTPUT
+          else
+            echo "has_update=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check bun version
+        id: check-bun
+        run: |
+          echo "Checking latest bun version..."
+          LATEST_BUN=$(curl -fsSL https://api.github.com/repos/oven-sh/bun/releases/latest | jq -r .tag_name | sed 's/^bun-v//')
+          CURRENT_BUN=$(grep 'BUN_VERSION=' config/versions.env | cut -d'=' -f2 | tr -d '"')
+          
+          echo "Current: $CURRENT_BUN, Latest: $LATEST_BUN"
+          
+          if [ "$CURRENT_BUN" != "$LATEST_BUN" ]; then
+            echo "has_update=true" >> $GITHUB_OUTPUT
+            echo "current=$CURRENT_BUN" >> $GITHUB_OUTPUT
+            echo "latest=$LATEST_BUN" >> $GITHUB_OUTPUT
+          else
+            echo "has_update=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Update versions.env
+        if: steps.check-nvm.outputs.has_update == 'true' || steps.check-pnpm.outputs.has_update == 'true' || steps.check-bun.outputs.has_update == 'true'
+        run: |
+          echo "Updating config/versions.env..."
+          
+          if [ "${{ steps.check-nvm.outputs.has_update }}" = "true" ]; then
+            sed -i 's/NVM_VERSION=.*/NVM_VERSION="${{ steps.check-nvm.outputs.latest }}"/' config/versions.env
+            echo "✓ Updated NVM: ${{ steps.check-nvm.outputs.current }} → ${{ steps.check-nvm.outputs.latest }}"
+          fi
+          
+          if [ "${{ steps.check-pnpm.outputs.has_update }}" = "true" ]; then
+            sed -i 's/PNPM_VERSION=.*/PNPM_VERSION="${{ steps.check-pnpm.outputs.latest }}"/' config/versions.env
+            echo "✓ Updated PNPM: ${{ steps.check-pnpm.outputs.current }} → ${{ steps.check-pnpm.outputs.latest }}"
+          fi
+          
+          if [ "${{ steps.check-bun.outputs.has_update }}" = "true" ]; then
+            sed -i 's/BUN_VERSION=.*/BUN_VERSION="${{ steps.check-bun.outputs.latest }}"/' config/versions.env
+            echo "✓ Updated BUN: ${{ steps.check-bun.outputs.current }} → ${{ steps.check-bun.outputs.latest }}"
+          fi
+      
+      - name: Create Pull Request for Tool Updates
+        if: steps.check-nvm.outputs.has_update == 'true' || steps.check-pnpm.outputs.has_update == 'true' || steps.check-bun.outputs.has_update == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update tool versions"
+          title: "🔄 Update Development Tool Versions"
+          body: |
+            ## Tool Version Updates
+            
+            This PR updates development tool versions in `config/versions.env`.
+            
+            **Updates:**
+            ${{ steps.check-nvm.outputs.has_update == 'true' && format('- **NVM**: `{0}` → `{1}`', steps.check-nvm.outputs.current, steps.check-nvm.outputs.latest) || '' }}
+            ${{ steps.check-pnpm.outputs.has_update == 'true' && format('- **PNPM**: `{0}` → `{1}`', steps.check-pnpm.outputs.current, steps.check-pnpm.outputs.latest) || '' }}
+            ${{ steps.check-bun.outputs.has_update == 'true' && format('- **BUN**: `{0}` → `{1}`', steps.check-bun.outputs.current, steps.check-bun.outputs.latest) || '' }}
+            
+            ---
+            🤖 This PR was automatically created by the auto-update-dependencies workflow.
+            
+            Please review and test before merging.
+          branch: "auto-update/tool-versions"
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
+            tools

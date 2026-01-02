@@ -1,0 +1,362 @@
+name: 🔍 Dependency Review
+
+on:
+  pull_request:
+    paths:
+      - '**/package.json'
+      - '**/package-lock.json'
+      - '**/yarn.lock'
+      - '**/pnpm-lock.yaml'
+      - '**/Gemfile'
+      - '**/Gemfile.lock'
+      - '**/requirements.txt'
+      - '**/Pipfile'
+      - '**/Pipfile.lock'
+      - '**/go.mod'
+      - '**/go.sum'
+      - '**/cargo.toml'
+      - '**/cargo.lock'
+      - 'config/versions.env'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  dependency-review:
+    name: Review Dependency Changes
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          deny-licenses: GPL-2.0, GPL-3.0
+          comment-summary-in-pr: always
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install analysis tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq bc
+          npm install -g npm-check-updates license-checker cost-of-modules
+      
+      - name: Analyze dependency changes
+        id: analyze
+        run: |
+          echo "🔍 Analyzing dependency changes..."
+          
+          # Get changed dependency files
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '(package\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|requirements\.txt|go\.mod|go\.sum|cargo\.toml|cargo\.lock|Gemfile|Pipfile)' || true)
+          
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No dependency files changed"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Changed dependency files:"
+          echo "$CHANGED_FILES"
+          
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" > /tmp/changed-deps.txt
+      
+      - name: Check for vulnerable dependencies
+        if: steps.analyze.outputs.has_changes == 'true'
+        id: vulnerability-check
+        run: |
+          echo "🔒 Checking for vulnerabilities..."
+          
+          VULN_COUNT=0
+          VULN_REPORT="/tmp/vulnerabilities.txt"
+          
+          # Check npm packages if package.json changed
+          if grep -q "package.json" /tmp/changed-deps.txt 2>/dev/null; then
+            if [ -f package.json ]; then
+              echo "Checking npm packages..."
+              npm audit --json > /tmp/npm-audit.json 2>&1 || true
+              
+              if [ -f /tmp/npm-audit.json ]; then
+                CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' /tmp/npm-audit.json)
+                HIGH=$(jq '.metadata.vulnerabilities.high // 0' /tmp/npm-audit.json)
+                MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' /tmp/npm-audit.json)
+                LOW=$(jq '.metadata.vulnerabilities.low // 0' /tmp/npm-audit.json)
+                
+                VULN_COUNT=$((CRITICAL + HIGH + MODERATE + LOW))
+                
+                echo "npm vulnerabilities: Critical=$CRITICAL, High=$HIGH, Moderate=$MODERATE, Low=$LOW" >> "$VULN_REPORT"
+              fi
+            fi
+          fi
+          
+          # Check Python packages if requirements.txt changed
+          if grep -q "requirements.txt" /tmp/changed-deps.txt 2>/dev/null; then
+            if [ -f requirements.txt ] && command -v pip &>/dev/null; then
+              echo "Checking Python packages..."
+              pip install safety 2>/dev/null || true
+              safety check --json > /tmp/safety.json 2>&1 || true
+              
+              if [ -f /tmp/safety.json ]; then
+                PYTHON_VULNS=$(jq 'length' /tmp/safety.json 2>/dev/null || echo 0)
+                VULN_COUNT=$((VULN_COUNT + PYTHON_VULNS))
+                echo "Python vulnerabilities: $PYTHON_VULNS" >> "$VULN_REPORT"
+              fi
+            fi
+          fi
+          
+          echo "vulnerability_count=$VULN_COUNT" >> $GITHUB_OUTPUT
+          
+          if [ $VULN_COUNT -gt 0 ]; then
+            cat "$VULN_REPORT"
+          fi
+      
+      - name: Check license compliance
+        if: steps.analyze.outputs.has_changes == 'true'
+        id: license-check
+        run: |
+          echo "📜 Checking license compliance..."
+          
+          LICENSE_ISSUES=0
+          LICENSE_REPORT="/tmp/licenses.txt"
+          
+          # Define forbidden licenses
+          FORBIDDEN_LICENSES=(
+            "GPL-2.0"
+            "GPL-3.0"
+            "AGPL"
+            "LGPL"
+          )
+          
+          # Check npm packages
+          if [ -f package.json ] && [ -d node_modules ]; then
+            echo "Checking npm package licenses..."
+            license-checker --json > /tmp/npm-licenses.json 2>/dev/null || true
+            
+            if [ -f /tmp/npm-licenses.json ]; then
+              for forbidden in "${FORBIDDEN_LICENSES[@]}"; do
+                MATCHES=$(jq -r --arg lic "$forbidden" 'to_entries[] | select(.value.licenses | contains($lic)) | .key' /tmp/npm-licenses.json 2>/dev/null || true)
+                if [ -n "$MATCHES" ]; then
+                  echo "⚠️  Forbidden license $forbidden found in:" >> "$LICENSE_REPORT"
+                  echo "$MATCHES" >> "$LICENSE_REPORT"
+                  LICENSE_ISSUES=$((LICENSE_ISSUES + 1))
+                fi
+              done
+            fi
+          fi
+          
+          echo "license_issues=$LICENSE_ISSUES" >> $GITHUB_OUTPUT
+          
+          if [ $LICENSE_ISSUES -gt 0 ]; then
+            cat "$LICENSE_REPORT"
+          else
+            echo "✅ No license compliance issues found"
+          fi
+      
+      - name: Calculate size impact
+        if: steps.analyze.outputs.has_changes == 'true'
+        id: size-impact
+        run: |
+          echo "📦 Calculating size impact..."
+          
+          # Check package.json changes
+          if [ -f package.json ]; then
+            # Install dependencies to measure size
+            if [ ! -d node_modules ]; then
+              npm install --prefer-offline --no-audit 2>/dev/null || true
+            fi
+            
+            if [ -d node_modules ]; then
+              # Calculate total size
+              TOTAL_SIZE=$(du -sh node_modules 2>/dev/null | cut -f1)
+              echo "Total node_modules size: $TOTAL_SIZE"
+              
+              # Get top 10 largest dependencies
+              echo "Largest dependencies:" > /tmp/size-impact.txt
+              cost-of-modules --no-install 2>/dev/null | head -15 >> /tmp/size-impact.txt || echo "Unable to calculate" >> /tmp/size-impact.txt
+              
+              echo "size=$TOTAL_SIZE" >> $GITHUB_OUTPUT
+              cat /tmp/size-impact.txt
+            else
+              echo "size=unknown" >> $GITHUB_OUTPUT
+            fi
+          fi
+      
+      - name: Check for outdated dependencies
+        if: steps.analyze.outputs.has_changes == 'true'
+        id: outdated-check
+        run: |
+          echo "📅 Checking for outdated dependencies..."
+          
+          if [ -f package.json ]; then
+            # Check for available updates
+            npm-check-updates --jsonUpgraded > /tmp/ncu.json 2>/dev/null || echo "{}" > /tmp/ncu.json
+            
+            OUTDATED_COUNT=$(jq 'length' /tmp/ncu.json)
+            echo "outdated_count=$OUTDATED_COUNT" >> $GITHUB_OUTPUT
+            
+            if [ "$OUTDATED_COUNT" -gt 0 ]; then
+              echo "Found $OUTDATED_COUNT outdated packages"
+              jq -r 'to_entries[] | "\(.key): \(.value)"' /tmp/ncu.json
+            else
+              echo "All packages are up to date"
+            fi
+          fi
+      
+      - name: Generate comprehensive report
+        if: steps.analyze.outputs.has_changes == 'true'
+        run: |
+          REPORT_FILE="/tmp/dependency-report.md"
+          
+          cat > "$REPORT_FILE" << 'EOF'
+          # 🔍 Dependency Review Report
+          
+          **PR:** #${{ github.event.pull_request.number }}
+          **Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          ## Summary
+          
+          EOF
+          
+          # Vulnerability summary
+          if [ "${{ steps.vulnerability-check.outputs.vulnerability_count }}" != "0" ]; then
+            cat >> "$REPORT_FILE" << EOF
+          ### ⚠️ Security Vulnerabilities
+          
+          Found **${{ steps.vulnerability-check.outputs.vulnerability_count }}** vulnerabilities in dependencies.
+          
+          Please review the security scan output above and update vulnerable packages.
+          
+          EOF
+          else
+            echo "### ✅ Security: No known vulnerabilities" >> "$REPORT_FILE"
+            echo "" >> "$REPORT_FILE"
+          fi
+          
+          # License summary
+          if [ "${{ steps.license-check.outputs.license_issues }}" != "0" ]; then
+            cat >> "$REPORT_FILE" << EOF
+          ### ⚠️ License Compliance Issues
+          
+          Found **${{ steps.license-check.outputs.license_issues }}** license compliance issues.
+          
+          Some dependencies use forbidden licenses (GPL-2.0, GPL-3.0, AGPL, LGPL).
+          
+          EOF
+          else
+            echo "### ✅ License Compliance: All licenses acceptable" >> "$REPORT_FILE"
+            echo "" >> "$REPORT_FILE"
+          fi
+          
+          # Size impact
+          if [ -n "${{ steps.size-impact.outputs.size }}" ]; then
+            cat >> "$REPORT_FILE" << EOF
+          ### 📦 Size Impact
+          
+          Total dependency size: **${{ steps.size-impact.outputs.size }}**
+          
+          EOF
+            if [ -f /tmp/size-impact.txt ]; then
+              echo '```' >> "$REPORT_FILE"
+              cat /tmp/size-impact.txt >> "$REPORT_FILE"
+              echo '```' >> "$REPORT_FILE"
+              echo "" >> "$REPORT_FILE"
+            fi
+          fi
+          
+          # Outdated packages
+          if [ "${{ steps.outdated-check.outputs.outdated_count }}" != "0" ]; then
+            cat >> "$REPORT_FILE" << EOF
+          ### 📅 Outdated Packages
+          
+          Found **${{ steps.outdated-check.outputs.outdated_count }}** packages with available updates.
+          
+          Consider updating these packages in a future PR.
+          
+          EOF
+          fi
+          
+          cat >> "$REPORT_FILE" << 'EOF'
+          
+          ## Recommendations
+          
+          1. **Security**: Address all critical and high severity vulnerabilities before merging
+          2. **Licenses**: Ensure all dependencies use acceptable licenses
+          3. **Size**: Monitor dependency size impact on bundle size
+          4. **Updates**: Keep dependencies reasonably up to date
+          
+          ---
+          
+          *This report was automatically generated by the dependency-review workflow.*
+          EOF
+          
+          cat "$REPORT_FILE"
+      
+      - name: Comment on PR
+        if: steps.analyze.outputs.has_changes == 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('/tmp/dependency-report.md', 'utf8');
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+      
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-review-reports
+          path: |
+            /tmp/dependency-report.md
+            /tmp/npm-audit.json
+            /tmp/npm-licenses.json
+            /tmp/ncu.json
+          retention-days: 30
+      
+      - name: Fail on critical issues
+        if: steps.analyze.outputs.has_changes == 'true'
+        run: |
+          FAIL=false
+          
+          # Fail on vulnerabilities
+          if [ "${{ steps.vulnerability-check.outputs.vulnerability_count }}" != "0" ]; then
+            if [ -f /tmp/npm-audit.json ]; then
+              CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' /tmp/npm-audit.json)
+              HIGH=$(jq '.metadata.vulnerabilities.high // 0' /tmp/npm-audit.json)
+              
+              if [ $CRITICAL -gt 0 ] || [ $HIGH -gt 0 ]; then
+                echo "❌ Critical or high severity vulnerabilities found"
+                FAIL=true
+              fi
+            fi
+          fi
+          
+          # Fail on license issues
+          if [ "${{ steps.license-check.outputs.license_issues }}" != "0" ]; then
+            echo "❌ License compliance issues found"
+            FAIL=true
+          fi
+          
+          if [ "$FAIL" = true ]; then
+            echo "::error::Dependency review failed due to critical issues"
+            exit 1
+          fi
+          
+          echo "✅ Dependency review passed"
