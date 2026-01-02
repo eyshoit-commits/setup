@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Setup Repository",
+      "type": "shell",
+      "command": "bash scripts/setup.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Validate Setup",
+      "type": "shell",
+      "command": "bash scripts/validate-setup.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Security Scan",
+      "type": "shell",
+      "command": "bash scripts/security-scan.sh",
+      "problemMatcher": []
+    }
+  ]
+}

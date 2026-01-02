@@ -1,58 +1,12 @@
-# Dependabot-Konfiguration für automatische Dependency-Updates
-# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
 updates:
-  # NPM Dependencies
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "03:00"
     open-pull-requests-limit: 10
     reviewers:
       - "eyshoit-commits"
-    assignees:
-      - "eyshoit-commits"
-    commit-message:
-      prefix: "⬆️ npm"
-      include: "scope"
     labels:
       - "dependencies"
-      - "npm"
-      - "automated"
-    # Auto-merge für patch und minor updates
-    versioning-strategy: increase
-
-  # GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-    open-pull-requests-limit: 5
-    reviewers:
-      - "eyshoit-commits"
-    commit-message:
-      prefix: "⬆️ actions"
-    labels:
-      - "dependencies"
-      - "github-actions"
-      - "automated"
-
-  # Docker (falls vorhanden)
-  - package-ecosystem: "docker"
-    directory: "/.devcontainer"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "05:00"
-    open-pull-requests-limit: 3
-    commit-message:
-      prefix: "⬆️ docker"
-    labels:
-      - "dependencies"
-      - "docker"
       - "automated"

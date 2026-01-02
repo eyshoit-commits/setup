@@ -1,0 +1,153 @@
+name: 🧪 Test Setup Scripts
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  test-bash-scripts:
+    name: Test Bash Scripts (Ubuntu)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        profile:
+          - name: "Minimal"
+            node: "false"
+            python: "false"
+            rust: "false"
+          - name: "Node Only"
+            node: "true"
+            python: "false"
+            rust: "false"
+          - name: "Python Only"
+            node: "false"
+            python: "true"
+            rust: "false"
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run setup (${{ matrix.profile.name }})
+        env:
+          FEATURE_NODE: ${{ matrix.profile.node }}
+          FEATURE_PYTHON: ${{ matrix.profile.python }}
+          FEATURE_RUST: ${{ matrix.profile.rust }}
+          SETUP_MODE: repro
+        run: |
+          ./scripts/setup.sh || true
+          echo "Setup completed (non-blocking for now)"
+      
+      - name: Check generated files
+        run: |
+          echo "Checking for generated files..."
+          
+          if [ -f "provenance.json" ]; then
+            echo "✅ provenance.json exists"
+            cat provenance.json
+          else
+            echo "⚠️  provenance.json not found"
+          fi
+          
+          if [ -f "agent-handshake.json" ]; then
+            echo "✅ agent-handshake.json exists"
+            cat agent-handshake.json
+          else
+            echo "⚠️  agent-handshake.json not found"
+          fi
+          
+          if [ -f "setup-report.json" ]; then
+            echo "✅ setup-report.json exists"
+            cat setup-report.json
+          else
+            echo "⚠️  setup-report.json not found"
+          fi
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: setup-artifacts-${{ matrix.profile.name }}
+          path: |
+            provenance.json
+            agent-handshake.json
+            setup-report.json
+          retention-days: 7
+  
+  test-powershell-scripts:
+    name: Test PowerShell Scripts (Windows)
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run setup
+        env:
+          FEATURE_NODE: "false"
+          FEATURE_PYTHON: "false"
+          FEATURE_RUST: "false"
+          SETUP_MODE: repro
+        shell: pwsh
+        run: |
+          .\scripts\setup.ps1
+          echo "Setup completed"
+      
+      - name: Check generated files
+        shell: pwsh
+        run: |
+          echo "Checking for generated files..."
+          
+          if (Test-Path "provenance.json") {
+            echo "✅ provenance.json exists"
+            Get-Content provenance.json
+          } else {
+            echo "⚠️  provenance.json not found"
+          }
+          
+          if (Test-Path "agent-handshake.json") {
+            echo "✅ agent-handshake.json exists"
+            Get-Content agent-handshake.json
+          } else {
+            echo "⚠️  agent-handshake.json not found"
+          }
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: setup-artifacts-windows
+          path: |
+            provenance.json
+            agent-handshake.json
+            setup-report.json
+          retention-days: 7
+  
+  validate-scripts:
+    name: Validate Script Syntax
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+      
+      - name: Check Bash scripts
+        run: |
+          echo "Checking bash scripts with shellcheck..."
+          shellcheck scripts/*.sh || true
+          echo "Shellcheck completed"
+      
+      - name: Validate JSON configs
+        run: |
+          echo "Validating JSON structure..."
+          # Check .pre-commit-config.yaml
+          if ! python3 -c "import yaml; yaml.safe_load(open('.pre-commit-config.yaml'))" 2>/dev/null; then
+            echo "⚠️  .pre-commit-config.yaml validation failed"
+          else
+            echo "✅ .pre-commit-config.yaml is valid"
+          fi

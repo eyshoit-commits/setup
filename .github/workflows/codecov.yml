@@ -1,0 +1,40 @@
+# Code Coverage workflow temporarily disabled
+# 
+# Reason:
+# - The workflow previously ran "npm test -- --coverage" and attempted to upload
+#   "./coverage/lcov.info" via the Codecov action.
+# - The "test" script in package.json is currently a placeholder and does not run
+#   a real test framework or produce coverage output.
+# - This caused the workflow to fail or to run without generating valid coverage data.
+#
+# Next steps to re-enable:
+# 1. Configure a real test framework (e.g., Jest, Mocha) in package.json so that
+#    "npm test -- --coverage" generates a coverage report at "./coverage/lcov.info"
+#    or update the command and path here to match the chosen tooling.
+# 2. Restore a workflow configuration similar to the one below, adjusting as needed:
+#
+# name: Code Coverage
+# on:
+#   push:
+#     branches: [main, develop]
+#   pull_request:
+#     branches: [main]
+#
+# jobs:
+#   coverage:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: '20'
+#       - run: npm ci
+#       - run: npm test -- --coverage
+#       - name: Upload Coverage
+#         uses: codecov/codecov-action@v4
+#         with:
+#           token: ${{ secrets.CODECOV_TOKEN }}
+#           files: ./coverage/lcov.info
+#
+# Until these steps are completed, this file remains commented out so GitHub
+# Actions ignores it and does not attempt to run a broken coverage workflow.

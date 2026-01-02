@@ -1,3 +1,25 @@
+# Generated files (can be regenerated)
+provenance.json
+agent-handshake.json
+setup-report.json
+README-badges.md
+
+# Auto-generated environment configuration
+env.d/10-tools.env
+
+# Environment files (keep .env.example)
+.env
+
+# Temporary files
+*.tmp
+*.log
+/tmp/
+
+# Artifacts (only commit intentionally)
+/artifacts/*.sh
+/artifacts/*.exe
+
+# IDE and OS files
 # Environment variables
 *.env
 .env.local
@@ -30,6 +52,26 @@ ENV/
 *.swo
 *~
 .DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+venv/
+.venv/
+
+# Rust
+target/
+Cargo.lock
+
+# MCP context
+.mcp/
 
 # Build outputs
 dist/
@@ -50,6 +92,10 @@ tmp/
 temp/
 *.tmp
 
+# Environment variables
+.env
+.env.local
+.env.*.local
 # OS
 Thumbs.db
 .DS_Store

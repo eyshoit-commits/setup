@@ -1,0 +1,38 @@
+name: 🔒 Enforce Pre-Commit
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+jobs:
+  pre-commit:
+    name: Pre-commit Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install pre-commit
+        run: pip install pre-commit
+      
+      - name: Run pre-commit
+        run: |
+          if [ -f .pre-commit-config.yaml ]; then
+            pre-commit run --all-files
+          else
+            echo "⚠️ .pre-commit-config.yaml not found, skipping"
+            exit 0
+          fi
+      
+      - name: Fail if pre-commit failed
+        if: failure()
+        run: |
+          echo "❌ Pre-commit checks failed"
+          echo "Run 'pre-commit run --all-files' locally to fix issues"
+          exit 1
