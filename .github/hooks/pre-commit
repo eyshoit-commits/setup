@@ -1,0 +1,79 @@
+#!/bin/bash
+# Pre-commit hook
+# Validates commits before they are committed
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo "🔍 Running pre-commit checks..."
+
+# Check for secrets
+echo ""
+echo "Checking for exposed secrets..."
+
+# Common secret patterns
+SECRET_PATTERNS=(
+    "AKIA[0-9A-Z]{16}"  # AWS Access Key
+    "password\s*=\s*['\"][^'\"]+['\"]"  # Password in code
+    "api[_-]?key\s*=\s*['\"][^'\"]+['\"]"  # API key
+    "secret\s*=\s*['\"][^'\"]+['\"]"  # Secret
+    "token\s*=\s*['\"][^'\"]+['\"]"  # Token
+)
+
+SECRETS_FOUND=0
+for pattern in "${SECRET_PATTERNS[@]}"; do
+    if git diff --cached | grep -iE "$pattern" > /dev/null; then
+        echo -e "${RED}❌ Potential secret detected: $pattern${NC}"
+        SECRETS_FOUND=1
+    fi
+done
+
+if [ $SECRETS_FOUND -eq 1 ]; then
+    echo -e "${RED}❌ Commit blocked: Potential secrets detected${NC}"
+    echo "Please remove secrets before committing"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ No secrets detected${NC}"
+
+# Check code formatting (if applicable)
+echo ""
+echo "Checking code formatting..."
+
+# Check for trailing whitespace
+if git diff --cached --check; then
+    echo -e "${GREEN}✅ No whitespace errors${NC}"
+else
+    echo -e "${YELLOW}⚠️  Whitespace errors detected${NC}"
+    echo "Fix with: git diff --cached --check"
+fi
+
+# Run linters if available
+if [ -f "package.json" ]; then
+    if grep -q "\"lint\"" package.json; then
+        echo ""
+        echo "Running linter..."
+        npm run lint --silent || {
+            echo -e "${YELLOW}⚠️  Linting issues found${NC}"
+            echo "Fix with: npm run lint:fix"
+        }
+    fi
+fi
+
+# ShellCheck for shell scripts
+if command -v shellcheck &> /dev/null; then
+    echo ""
+    echo "Checking shell scripts..."
+    git diff --cached --name-only --diff-filter=ACM | grep -E '\.sh$' | while read -r file; do
+        if [ -f "$file" ]; then
+            shellcheck "$file" || echo -e "${YELLOW}⚠️  ShellCheck warnings in $file${NC}"
+        fi
+    done
+fi
+
+echo ""
+echo -e "${GREEN}✅ Pre-commit checks passed${NC}"
+exit 0

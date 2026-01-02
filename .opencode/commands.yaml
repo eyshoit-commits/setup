@@ -1,0 +1,54 @@
+commands:
+  setup:
+    description: "Run complete environment setup"
+    script: "bash scripts/setup.sh"
+    
+  validate:
+    description: "Validate environment configuration"
+    script: "bash scripts/validate.sh"
+    
+  smoke-test:
+    description: "Run smoke tests to verify installation"
+    script: "bash scripts/smoke-test.sh"
+    
+  setup-windows:
+    description: "Run setup on Windows with PowerShell"
+    script: "powershell -File scripts/setup.ps1"
+    
+  report:
+    description: "Generate setup report"
+    script: "bash scripts/generate-report.sh"
+    
+  clean:
+    description: "Clean temporary files and caches"
+    script: |
+      rm -rf node_modules
+      rm -rf .venv
+      rm -rf target
+      rm -f setup-report.json
+      
+  update-env:
+    description: "Update environment variables from env.d"
+    script: |
+      for env_file in env.d/*.env; do
+        [ -f "$env_file" ] && source "$env_file"
+      done
+      
+  pre-commit-install:
+    description: "Install pre-commit hooks"
+    script: |
+      cp config/pre-commit-config.yaml .pre-commit-config.yaml
+      pre-commit install
+      
+  security-scan:
+    description: "Run security scan with gitleaks"
+    script: "gitleaks detect --verbose"
+    
+  offline-prepare:
+    description: "Download artifacts for offline installation"
+    script: |
+      mkdir -p artifacts
+      cd artifacts
+      curl -LO https://astral.sh/uv/install.sh
+      mv install.sh uv-installer.sh
+      echo "Download other installers manually as needed"

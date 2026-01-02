@@ -1,0 +1,75 @@
+name: "testing-agent"
+role: "qa-engineer"
+description: "Specialized agent for testing and quality assurance"
+
+capabilities:
+  - unit-testing
+  - integration-testing
+  - e2e-testing
+  - test-automation
+
+responsibilities:
+  - "Write and maintain test suites"
+  - "Perform code quality checks"
+  - "Run smoke tests and validation"
+  - "Generate test reports"
+
+skills:
+  - testing
+  - code-analysis
+
+testing_types:
+  - unit
+  - integration
+  - e2e
+  - smoke
+  - performance
+
+frameworks:
+  python:
+    - pytest
+    - unittest
+  javascript:
+    - jest
+    - vitest
+    - playwright
+    - cypress
+  rust:
+    - cargo-test
+    - criterion
+
+tools:
+  - pytest
+  - jest
+  - playwright
+  - cargo-test
+
+coverage:
+  enabled: true
+  threshold: 80
+  tools:
+    - coverage
+    - nyc
+    - tarpaulin
+
+quality_checks:
+  - linting
+  - type-checking
+  - security-scanning
+  - dependency-audit
+
+smoke_tests:
+  - node-version-check
+  - python-version-check
+  - rust-version-check
+  - pnpm-version-check
+
+automation:
+  scripts:
+    - "scripts/smoke-test.sh"
+    - "scripts/validate.sh"
+
+context_awareness:
+  - "setup-report.json"
+  - ".mcp/context.json"
+  - "config/versions.env"

@@ -1,0 +1,85 @@
+{
+  "main": {
+    "required_status_checks": {
+      "strict": true,
+      "contexts": [
+        "setup-validation",
+        "security-scan / CodeQL Analysis (javascript)",
+        "security-scan / CodeQL Analysis (python)",
+        "security-scan / Snyk Security Scan",
+        "security-scan / Dependency Scanning",
+        "security-scan / Secret Detection",
+        "code-quality / Codacy Analysis",
+        "code-quality / Code Coverage",
+        "code-quality / Linting & Formatting",
+        "code-quality / ShellCheck",
+        "ai-review / CodeRabbit Review",
+        "ai-review / CodiumAI PR Agent",
+        "mcp-health-check / MCP Server Health Monitoring",
+        "drift-check / Infrastructure Drift Detection",
+        "commit-validation / Validate Conventional Commits",
+        "commit-validation / PR Title & Description Check"
+      ]
+    },
+    "required_pull_request_reviews": {
+      "required_approving_review_count": 2,
+      "dismiss_stale_reviews": true,
+      "require_code_owner_reviews": true,
+      "require_last_push_approval": true
+    },
+    "enforce_admins": true,
+    "required_linear_history": true,
+    "allow_force_pushes": false,
+    "allow_deletions": false,
+    "required_conversation_resolution": true,
+    "lock_branch": false,
+    "allow_fork_syncing": true
+  },
+  "develop": {
+    "required_status_checks": {
+      "strict": true,
+      "contexts": [
+        "setup-validation",
+        "security-scan / CodeQL Analysis (javascript)",
+        "security-scan / CodeQL Analysis (python)",
+        "code-quality / Linting & Formatting",
+        "commit-validation / Validate Conventional Commits"
+      ]
+    },
+    "required_pull_request_reviews": {
+      "required_approving_review_count": 1,
+      "dismiss_stale_reviews": true,
+      "require_code_owner_reviews": false
+    },
+    "enforce_admins": false,
+    "required_linear_history": false,
+    "allow_force_pushes": false,
+    "allow_deletions": false
+  },
+  "release/*": {
+    "required_status_checks": {
+      "strict": true,
+      "contexts": [
+        "setup-validation",
+        "security-scan / CodeQL Analysis (javascript)",
+        "security-scan / CodeQL Analysis (python)",
+        "security-scan / Snyk Security Scan"
+      ]
+    },
+    "required_pull_request_reviews": {
+      "required_approving_review_count": 2,
+      "dismiss_stale_reviews": true,
+      "require_code_owner_reviews": true
+    },
+    "enforce_admins": true,
+    "required_linear_history": true,
+    "allow_force_pushes": false,
+    "allow_deletions": false
+  },
+  "notes": {
+    "description": "Branch protection configuration for the repository",
+    "usage": "Use GitHub API or UI to apply these settings",
+    "api_endpoint": "PUT /repos/{owner}/{repo}/branches/{branch}/protection",
+    "documentation": "https://docs.github.com/en/rest/branches/branch-protection"
+  }
+}

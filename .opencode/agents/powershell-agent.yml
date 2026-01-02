@@ -1,0 +1,67 @@
+name: powershell-enterprise-agent
+description: Enterprise PowerShell scripting agent for Windows automation
+version: 1.0.0
+
+skills:
+  - script-execution
+  - environment-validation
+  - secret-management
+  - workflow-automation
+  - windows-administration
+  - deployment-automation
+
+capabilities:
+  - Execute complex PowerShell scripts
+  - Validate development environments on Windows
+  - Manage secrets and credentials securely
+  - Automate workflow processes
+  - Perform system checks and health monitoring
+  - Handle CI/CD pipeline tasks on Windows
+
+triggers:
+  - event: repository-setup
+    action: initialize-environment
+  - event: environment-validation
+    action: validate-dependencies
+  - event: deployment
+    action: deploy-resources
+  - event: health-check
+    action: monitor-systems
+
+configuration:
+  shell: pwsh
+  timeout: 300
+  retry_count: 3
+  error_handling: strict
+  execution_policy: RemoteSigned
+
+permissions:
+  - read:repository
+  - write:scripts
+  - execute:commands
+  - manage:secrets
+
+security:
+  sandboxed: true
+  network_access: limited
+  file_system_access: restricted
+  execution_policy: strict
+
+logging:
+  level: info
+  output: stdout
+  format: structured
+
+metadata:
+  author: Enterprise Setup
+  tags:
+    - automation
+    - powershell
+    - windows
+    - devops
+    - ci-cd
+  documentation: docs/SETUP_GUIDE.md
+  platforms:
+    - windows
+    - linux
+    - macos
