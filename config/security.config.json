@@ -1,0 +1,170 @@
+{
+  "version": "1.0.0",
+  "branchProtection": {
+    "main": {
+      "enabled": true,
+      "requiredReviews": {
+        "count": 1,
+        "dismissStaleReviews": true,
+        "requireCodeOwnerReviews": true,
+        "requireLastPushApproval": false
+      },
+      "requiredStatusChecks": {
+        "strict": true,
+        "contexts": [
+          "setup-validation",
+          "security-scan",
+          "mcp-health-check",
+          "drift-check",
+          "commit-validation"
+        ]
+      },
+      "restrictions": {
+        "enforceAdmins": true,
+        "requireLinearHistory": true,
+        "allowForcePushes": false,
+        "allowDeletions": false,
+        "requireConversationResolution": true,
+        "requireSignedCommits": false,
+        "lockBranch": false
+      }
+    },
+    "develop": {
+      "enabled": false,
+      "requiredReviews": {
+        "count": 1,
+        "dismissStaleReviews": false,
+        "requireCodeOwnerReviews": false
+      }
+    }
+  },
+  "secretScanning": {
+    "enabled": true,
+    "pushProtection": true,
+    "alerts": {
+      "enabled": true,
+      "recipients": ["@eyshoit-commits", "@security-team"]
+    }
+  },
+  "dependencyScanning": {
+    "enabled": true,
+    "dependabot": {
+      "enabled": true,
+      "autoMerge": {
+        "patch": true,
+        "minor": true,
+        "major": false
+      },
+      "schedule": "weekly",
+      "openPRLimit": 10
+    },
+    "advisories": {
+      "enabled": true,
+      "severity": {
+        "critical": {
+          "action": "block",
+          "sla": "24h"
+        },
+        "high": {
+          "action": "warn",
+          "sla": "72h"
+        },
+        "medium": {
+          "action": "warn",
+          "sla": "7d"
+        },
+        "low": {
+          "action": "log",
+          "sla": "30d"
+        }
+      }
+    }
+  },
+  "codeScanning": {
+    "enabled": true,
+    "tools": {
+      "codeql": {
+        "enabled": true,
+        "languages": ["javascript", "typescript", "python", "go"],
+        "schedule": "weekly"
+      },
+      "trivy": {
+        "enabled": true,
+        "severity": ["CRITICAL", "HIGH", "MEDIUM"],
+        "schedule": "weekly"
+      }
+    },
+    "alerts": {
+      "autoClose": false,
+      "requireReview": true
+    }
+  },
+  "accessControl": {
+    "repository": {
+      "visibility": "private",
+      "defaultBranch": "main",
+      "requiresApproval": true
+    },
+    "teams": {
+      "eyshoit-commits": {
+        "permission": "admin"
+      },
+      "security-team": {
+        "permission": "maintain"
+      },
+      "devops-team": {
+        "permission": "write"
+      },
+      "agent-team": {
+        "permission": "write"
+      },
+      "documentation-team": {
+        "permission": "write"
+      }
+    }
+  },
+  "audit": {
+    "enabled": true,
+    "logRetention": "90d",
+    "events": [
+      "push",
+      "pull_request",
+      "issue",
+      "release",
+      "deployment",
+      "member_added",
+      "member_removed",
+      "permission_changed"
+    ]
+  },
+  "compliance": {
+    "conventionalCommits": {
+      "enabled": true,
+      "enforce": true
+    },
+    "signedCommits": {
+      "enabled": false,
+      "required": false
+    },
+    "prTemplates": {
+      "enabled": true,
+      "required": true
+    },
+    "issueTemplates": {
+      "enabled": true,
+      "required": false
+    }
+  },
+  "notifications": {
+    "security": {
+      "enabled": true,
+      "channels": ["email", "webhook"],
+      "recipients": ["@security-team"]
+    },
+    "deployment": {
+      "enabled": true,
+      "channels": ["slack", "email"],
+      "recipients": ["@devops-team"]
+    }
+  }
+}
