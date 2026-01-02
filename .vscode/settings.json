@@ -1,5 +1,4 @@
 {
-  // Editor Settings
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
   "editor.codeActionsOnSave": {
@@ -16,8 +15,6 @@
   "editor.guides.bracketPairs": true,
   "editor.inlineSuggest.enabled": true,
   "editor.suggestSelection": "first",
-  
-  // Files Settings
   "files.autoSave": "onFocusChange",
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
@@ -32,20 +29,14 @@
     "**/build": true,
     "**/.vscode-test": true
   },
-  
-  // Git Settings
   "git.autofetch": true,
   "git.enableSmartCommit": true,
   "git.confirmSync": false,
   "git.pruneOnFetch": true,
-  
-  // Terminal Settings
   "terminal.integrated.defaultProfile.linux": "bash",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.defaultProfile.windows": "PowerShell",
   "terminal.integrated.fontSize": 12,
-  
-  // Search Settings
   "search.exclude": {
     "**/node_modules": true,
     "**/bower_components": true,
@@ -54,8 +45,6 @@
     "**/build": true,
     "**/.git": true
   },
-  
-  // Language-Specific Settings
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -81,23 +70,15 @@
   "[shellscript]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"
   },
-  
-  // Security Settings
   "security.workspace.trust.enabled": true,
   "security.workspace.trust.untrustedFiles": "prompt",
-  
-  // Extension Settings
   "extensions.autoUpdate": true,
   "extensions.autoCheckUpdates": true,
-  
-  // Prettier Settings
   "prettier.singleQuote": true,
   "prettier.trailingComma": "es5",
   "prettier.tabWidth": 2,
   "prettier.semi": true,
   "prettier.printWidth": 100,
-  
-  // ESLint Settings
   "eslint.enable": true,
   "eslint.validate": [
     "javascript",
@@ -105,35 +86,23 @@
     "typescript",
     "typescriptreact"
   ],
-  
-  // Python Settings
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": false,
   "python.linting.flake8Enabled": true,
   "python.formatting.provider": "black",
   "python.testing.pytestEnabled": true,
-  
-  // GitHub Settings
   "github.copilot.enable": {
     "*": true,
     "yaml": true,
     "plaintext": false,
     "markdown": true
   },
-  
-  // Workbench Settings
   "workbench.colorTheme": "Default Dark+",
   "workbench.iconTheme": "vscode-icons",
   "workbench.startupEditor": "welcomePage",
-  
-  // Breadcrumbs
   "breadcrumbs.enabled": true,
-  
-  // Minimap
   "editor.minimap.enabled": true,
   "editor.minimap.maxColumn": 120,
-  
-  // OpenCode Agent Settings
   "opencode.enabled": true,
   "opencode.autoLoad": true,
   "opencode.agents.dev.enabled": true,

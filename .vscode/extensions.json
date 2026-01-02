@@ -1,58 +1,37 @@
 {
   "recommendations": [
-    // Essential Extensions
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
     "editorconfig.editorconfig",
     "eamodio.gitlens",
-    
-    // Language Support
     "ms-python.python",
     "ms-python.black-formatter",
     "ms-python.flake8",
     "golang.go",
     "rust-lang.rust-analyzer",
     "ms-vscode.powershell",
-    
-    // GitHub Integration
     "github.vscode-pull-request-github",
     "github.copilot",
     "github.copilot-chat",
     "github.vscode-github-actions",
-    
-    // Testing
     "hbenl.vscode-test-explorer",
     "orta.vscode-jest",
     "littlefoxteam.vscode-python-test-adapter",
-    
-    // Code Quality
     "sonarsource.sonarlint-vscode",
     "streetsidesoftware.code-spell-checker",
     "ryanluker.vscode-coverage-gutters",
-    
-    // Formatting & Linting
     "foxundermoon.shell-format",
     "redhat.vscode-yaml",
     "tamasfe.even-better-toml",
-    
-    // Utilities
     "vscode-icons-team.vscode-icons",
     "wayou.vscode-todo-highlight",
     "aaron-bond.better-comments",
     "gruntfuggly.todo-tree",
-    
-    // Docker & Containers
     "ms-azuretools.vscode-docker",
     "ms-vscode-remote.remote-containers",
-    
-    // Markdown
     "yzhang.markdown-all-in-one",
     "davidanson.vscode-markdownlint",
-    
-    // Security
     "snyk-security.snyk-vulnerability-scanner",
-    
-    // Git
     "donjayamanne.githistory",
     "mhutchie.git-graph"
   ],
