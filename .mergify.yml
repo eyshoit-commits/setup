@@ -41,41 +41,6 @@ queue_rules:
     priority: high
 
 pull_request_rules:
-  - name: Add approved PRs with passing checks to Merge queue
-    conditions:
-      - base=main
-      # Only auto-queue PRs explicitly marked for automation
-      - label=automerge
-      - "#approved-reviews-by>=1"
-      # Ensure CI is green before enqueuing
-      - check-success=CI / validate
-      - check-success=CI / unit-tests
-      - check-success=CI / integration-tests
-    actions:
-      queue:
-        name: Merge
-        method: squash
-    # Main merge queue enforcing repository quality gates and branch protection policy
-    merge_method: squash
-    speculative_checks: 2
-    batch_size: 5
-    conditions:
-      # Only protect main; add other protected branches here if needed (e.g., release/*)
-      - base=main
-      # Reviews: mirror branch protection (2 required approving reviews, no pending review requests)
-      - '#approved-reviews-by>=2'
-      - '#review-requested=0'
-      - '#changes-requested-reviews-by=0'
-      # Status / check runs representing repository quality gates
-      - 'check-success=CI'
-      - 'check-success=CodeQL'
-      - 'check-success=Snyk'
-      - 'check-success=Lint'
-      - 'check-success=Smoke tests'
-      # Ensure branch is clean and mergeable
-      - 'conflict=FALSE'
-
-pull_request_rules:
   # Queue PRs that meet branch protection and quality gate requirements
   - name: Add pull requests to Merge queue when all conditions are met
     conditions:
