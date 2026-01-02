@@ -1,0 +1,43 @@
+version: "1.0"
+name: "enterprise-setup"
+description: "Enterprise-grade development environment with multi-agent orchestration"
+
+runtime:
+  default_shell: bash
+  python_version: "3.12"
+  node_version: "20"
+
+paths:
+  workspace: "."
+  scripts: "./scripts"
+  config: "./config"
+  artifacts: "./artifacts"
+
+features:
+  - idempotent-setup
+  - offline-mode
+  - version-locking
+  - security-scanning
+  - mcp-context
+
+agents:
+  orchestrator: ".opencode/agents/orchestrator.yml"
+  backend: ".opencode/agents/backend-agent.yml"
+  frontend: ".opencode/agents/frontend-agent.yml"
+  devops: ".opencode/agents/devops-agent.yml"
+  testing: ".opencode/agents/testing-agent.yml"
+
+skills:
+  - ".opencode/skills/code-analysis.yml"
+  - ".opencode/skills/testing.yml"
+  - ".opencode/skills/documentation.yml"
+
+security:
+  pre_commit: true
+  gitleaks: true
+  secret_scanning: true
+
+reporting:
+  json_reports: true
+  mcp_context: true
+  smoke_tests: true

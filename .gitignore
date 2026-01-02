@@ -1,0 +1,100 @@
+# Dependencies
+node_modules/
+bower_components/
+jspm_packages/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+ENV/
+env/
+
+# Rust
+target/
+Cargo.lock
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Generated files
+setup-report.json
+.mcp/context.json
+env.d/10-tools.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Package managers
+.pnpm-store/
+.yarn/
+.npm/
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Artifacts (optional - large binaries)
+# Uncomment to exclude installers from git
+# artifacts/*.sh
+# artifacts/*.exe
+# artifacts/*.tar.gz
+# artifacts/*.zip
+
+# Pre-commit
+.pre-commit-config.yaml
+
+# Local development
+.local/
