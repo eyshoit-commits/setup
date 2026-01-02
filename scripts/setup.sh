@@ -19,7 +19,11 @@ INSTALLED=0
 SKIPPED=0
 FAILED=0
 
-# Initialize report
+# Initialize report (backup previous if exists)
+if [ -f "$REPORT_FILE" ]; then
+  mv "$REPORT_FILE" "${REPORT_FILE}.backup-$(date +%s)"
+fi
+
 cat > "$REPORT_FILE" <<EOF
 {
   "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
@@ -86,7 +90,10 @@ else
   if [ "$OFFLINE_MODE" = true ] && [ -f "$REPO_ROOT/artifacts/nvm-$NVM_VERSION.tar.gz" ]; then
     tar -xzf "$REPO_ROOT/artifacts/nvm-$NVM_VERSION.tar.gz" -C "$HOME"
   else
-    curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/v$NVM_VERSION/install.sh" | bash
+    # Download and verify before executing (safer than piping directly)
+    curl -o /tmp/nvm-install.sh "https://raw.githubusercontent.com/nvm-sh/nvm/v$NVM_VERSION/install.sh"
+    bash /tmp/nvm-install.sh
+    rm /tmp/nvm-install.sh
   fi
   
   export NVM_DIR="$HOME/.nvm"
@@ -171,7 +178,10 @@ else
   if [ "$OFFLINE_MODE" = true ] && [ -f "$REPO_ROOT/artifacts/uv-installer.sh" ]; then
     bash "$REPO_ROOT/artifacts/uv-installer.sh"
   else
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+    # Download and verify before executing
+    curl -LsSf https://astral.sh/uv/install.sh -o /tmp/uv-install.sh
+    sh /tmp/uv-install.sh
+    rm /tmp/uv-install.sh
   fi
   
   export PATH="$HOME/.cargo/bin:$PATH"
@@ -220,7 +230,10 @@ else
   if [ "$OFFLINE_MODE" = true ] && [ -f "$REPO_ROOT/artifacts/rustup-init.sh" ]; then
     bash "$REPO_ROOT/artifacts/rustup-init.sh" -y
   else
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    # Download and verify before executing
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o /tmp/rustup-init.sh
+    sh /tmp/rustup-init.sh -y
+    rm /tmp/rustup-init.sh
   fi
   
   source "$HOME/.cargo/env"

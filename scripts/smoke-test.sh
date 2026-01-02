@@ -21,10 +21,16 @@ else
 fi
 
 # Python (via uvx)
-if command -v uvx &>/dev/null && uvx ruff --version &>/dev/null; then
-  echo -e "${GREEN}✅ Python/uvx smoke test passed${NC} ($(uvx ruff --version))"
+# Check for uvx first (lightweight), then verify ruff works
+if command -v uvx &>/dev/null; then
+  if uvx ruff --version &>/dev/null; then
+    echo -e "${GREEN}✅ Python/uvx smoke test passed${NC} ($(uvx ruff --version))"
+  else
+    echo -e "${RED}❌ Python/uvx smoke test FAILED (ruff not working)${NC}"
+    ((FAILED++))
+  fi
 else
-  echo -e "${RED}❌ Python/uvx smoke test FAILED${NC}"
+  echo -e "${RED}❌ Python/uvx smoke test FAILED (uvx not found)${NC}"
   ((FAILED++))
 fi
 
