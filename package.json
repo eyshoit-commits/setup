@@ -1,4 +1,11 @@
 {
+  "name": "setup",
+  "version": "1.0.0",
+  "description": "Enterprise Repository Setup",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "lint": "echo \"No linting configured yet\"",
+    "build": "echo \"No build configured yet\""
   "name": "enterprise-setup",
   "version": "1.0.0",
   "description": "Enterprise-grade development environment setup with multi-agent orchestration",
@@ -19,6 +26,15 @@
   },
   "keywords": [
     "setup",
+    "enterprise",
+    "opencode"
+  ],
+  "author": "eyshoit-commits",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eyshoit-commits/setup/issues"
+  },
+  "homepage": "https://github.com/eyshoit-commits/setup#readme"
     "development-environment",
     "devops",
     "automation",

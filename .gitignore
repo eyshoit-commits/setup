@@ -50,6 +50,10 @@ tmp/
 temp/
 *.tmp
 
+# Environment variables
+.env
+.env.local
+.env.*.local
 # OS
 Thumbs.db
 .DS_Store
