@@ -5,7 +5,7 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/home/runner/work/setup/setup"
+        "${PROJECT_ROOT}"
       ],
       "description": "Filesystem access for repository operations",
       "permissions": {
@@ -33,7 +33,7 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-git",
-        "/home/runner/work/setup/setup"
+        "${PROJECT_ROOT}"
       ],
       "description": "Git operations for version control",
       "permissions": {
@@ -67,6 +67,7 @@
   "metadata": {
     "version": "1.0.0",
     "description": "MCP Server configuration for enterprise setup repository",
-    "author": "Enterprise Setup Team"
+    "author": "Enterprise Setup Team",
+    "notes": "Replace ${PROJECT_ROOT} with the absolute path to your repository root directory"
   }
 }
