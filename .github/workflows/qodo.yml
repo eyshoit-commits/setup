@@ -1,0 +1,19 @@
+name: Qodo AI Testing
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  qodo-cover:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Qodo Cover Agent
+        uses: Codium-ai/cover-agent@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
