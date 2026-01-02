@@ -130,6 +130,7 @@ FEATURE_PYTHON=true FEATURE_AI=true \
 
 Complete production-ready repository setup with OpenCode Skills, GitHub Marketplace Apps, Enterprise Security Workflows, and Setup Automation.
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4123d1b055e447648c58627f64af4999)](https://app.codacy.com/gh/eyshoit-commits/setup?utm_source=github.com&utm_medium=referral&utm_content=eyshoit-commits/setup&utm_campaign=Badge_Grade)
 [![CodeQL](https://github.com/eyshoit-commits/setup/workflows/CodeQL%20Security%20Analysis/badge.svg)](https://github.com/eyshoit-commits/setup/actions)
 [![Snyk](https://github.com/eyshoit-commits/setup/workflows/Snyk%20Security%20Scan/badge.svg)](https://github.com/eyshoit-commits/setup/actions)
 
