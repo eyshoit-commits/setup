@@ -1,0 +1,6 @@
+# Snyk configuration
+version: v1.22.0
+language-settings:
+  python:
+    # Scan requirements.txt
+    targetFile: config/requirements.txt

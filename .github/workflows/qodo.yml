@@ -1,17 +1,19 @@
-name: CodeRabbit AI Review
+name: Qodo AI Testing
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize]
 
 jobs:
-  coderabbit:
+  qodo-cover:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
       contents: read
     steps:
-      - name: CodeRabbit Review
-        uses: coderabbitai/coderabbit-action@v1
+      - uses: actions/checkout@v4
+      
+      - name: Qodo Cover Agent
+        uses: Codium-ai/cover-agent@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

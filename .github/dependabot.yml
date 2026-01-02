@@ -1,5 +1,6 @@
 version: 2
 updates:
+  # npm dependencies
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -9,4 +10,29 @@ updates:
       - "eyshoit-commits"
     labels:
       - "dependencies"
-      - "automated"
+      - "npm"
+    commit-message:
+      prefix: "chore(deps)"
+    
+  # Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/config"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "chore(deps)"
+    
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(deps)"
