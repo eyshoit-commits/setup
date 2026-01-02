@@ -2,5 +2,5 @@
 set -euo pipefail
 
 echo "📄 Checking license headers..."
-echo "✅ License header check passed (not implemented yet)"
-exit 0
+echo "⚠️ License header check is not implemented yet. Failing to indicate missing check."
+exit 2
