@@ -1,0 +1,9 @@
+{
+  "name": "setup-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "validate": "bash ../scripts/validate.sh"
+  },
+  "devDependencies": {}
+}
