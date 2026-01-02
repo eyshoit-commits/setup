@@ -1,0 +1,68 @@
+name: "documentation"
+description: "Comprehensive documentation generation and maintenance"
+
+types:
+  - api-docs
+  - user-guides
+  - technical-specs
+  - inline-comments
+
+tools:
+  python:
+    - sphinx
+    - mkdocs
+    - pydoc
+  javascript:
+    - jsdoc
+    - typedoc
+    - storybook
+  rust:
+    - rustdoc
+    - mdbook
+
+formats:
+  - markdown
+  - html
+  - pdf
+  - json
+
+sections:
+  installation:
+    file: "docs/INSTALLATION.md"
+    content:
+      - prerequisites
+      - step-by-step-guide
+      - troubleshooting
+  
+  security:
+    file: "docs/SECURITY.md"
+    content:
+      - security-features
+      - vulnerability-reporting
+      - security-best-practices
+  
+  troubleshooting:
+    file: "docs/TROUBLESHOOTING.md"
+    content:
+      - common-issues
+      - debugging-tips
+      - support-resources
+
+automation:
+  - generate-api-docs
+  - update-readme
+  - validate-links
+  - check-spelling
+
+quality_checks:
+  - spelling
+  - grammar
+  - link-validation
+  - code-example-validation
+
+best_practices:
+  - "Keep documentation close to code"
+  - "Use clear and concise language"
+  - "Include code examples"
+  - "Update docs with code changes"
+  - "Version documentation"

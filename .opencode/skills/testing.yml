@@ -1,0 +1,67 @@
+name: "testing"
+description: "Comprehensive testing capabilities across all layers"
+
+test_types:
+  unit:
+    description: "Test individual components in isolation"
+    tools:
+      - pytest
+      - jest
+      - cargo-test
+  
+  integration:
+    description: "Test component interactions"
+    tools:
+      - pytest
+      - jest
+      - testcontainers
+  
+  e2e:
+    description: "Test complete user workflows"
+    tools:
+      - playwright
+      - cypress
+  
+  smoke:
+    description: "Quick validation of critical functionality"
+    script: "scripts/smoke-test.sh"
+
+frameworks:
+  python:
+    - pytest
+    - unittest
+    - hypothesis
+  javascript:
+    - jest
+    - vitest
+    - mocha
+  rust:
+    - cargo-test
+    - proptest
+
+coverage:
+  enabled: true
+  minimum: 80
+  exclude:
+    - "tests/"
+    - "**/__pycache__/"
+    - "**/node_modules/"
+
+reporting:
+  formats:
+    - console
+    - html
+    - json
+    - lcov
+  
+automation:
+  pre_commit: true
+  ci_cd: true
+  watch_mode: true
+
+best_practices:
+  - "Use descriptive test names"
+  - "Follow AAA pattern (Arrange, Act, Assert)"
+  - "Keep tests isolated and independent"
+  - "Mock external dependencies"
+  - "Test edge cases and error conditions"

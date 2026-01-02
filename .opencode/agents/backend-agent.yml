@@ -1,0 +1,61 @@
+name: "backend-agent"
+role: "backend-developer"
+description: "Specialized agent for backend development tasks"
+
+capabilities:
+  - python-development
+  - api-development
+  - database-management
+  - rust-development
+
+responsibilities:
+  - "Develop and maintain backend services"
+  - "Implement API endpoints and business logic"
+  - "Manage database schemas and migrations"
+  - "Write backend tests and documentation"
+
+skills:
+  - code-analysis
+  - testing
+
+languages:
+  primary:
+    - python
+    - rust
+  secondary:
+    - sql
+    - toml
+
+tools:
+  python:
+    - uv
+    - uvx
+    - ruff
+    - pytest
+  rust:
+    - cargo
+    - clippy
+    - rustfmt
+
+frameworks:
+  - fastapi
+  - django
+  - actix-web
+  - axum
+
+testing:
+  frameworks:
+    - pytest
+    - cargo-test
+  coverage: true
+  
+linting:
+  python:
+    - ruff
+  rust:
+    - clippy
+    - rustfmt
+
+context_awareness:
+  - ".mcp/context.json"
+  - "config/versions.env"

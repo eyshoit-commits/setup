@@ -6,6 +6,19 @@
     "test": "echo \"Error: no test specified\" && exit 0",
     "lint": "echo \"No linting configured yet\"",
     "build": "echo \"No build configured yet\""
+  "name": "enterprise-setup",
+  "version": "1.0.0",
+  "description": "Enterprise-grade development environment setup with multi-agent orchestration",
+  "private": true,
+  "scripts": {
+    "setup": "bash scripts/setup.sh",
+    "setup:windows": "powershell -File scripts/setup.ps1",
+    "validate": "bash scripts/validate.sh",
+    "test": "bash scripts/smoke-test.sh",
+    "smoke-test": "bash scripts/smoke-test.sh",
+    "report": "bash scripts/generate-report.sh",
+    "security:scan": "gitleaks detect --verbose",
+    "precommit:install": "cp config/pre-commit-config.yaml .pre-commit-config.yaml && pre-commit install"
   },
   "repository": {
     "type": "git",
@@ -22,4 +35,22 @@
     "url": "https://github.com/eyshoit-commits/setup/issues"
   },
   "homepage": "https://github.com/eyshoit-commits/setup#readme"
+    "development-environment",
+    "devops",
+    "automation",
+    "enterprise",
+    "multi-agent",
+    "mcp",
+    "security"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eyshoit-commits/setup/issues"
+  },
+  "homepage": "https://github.com/eyshoit-commits/setup#readme",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  }
 }

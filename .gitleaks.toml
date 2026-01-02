@@ -1,0 +1,27 @@
+title = "gitleaks config"
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key"
+regex = '''(?i)(api[_-]?key|apikey)['\"]?\s*[:=]\s*['\"]?[a-zA-Z0-9]{32,}'''
+
+[[rules]]
+id = "aws-access-key"
+description = "AWS Access Key"
+regex = '''AKIA[0-9A-Z]{16}'''
+
+[[rules]]
+id = "github-token"
+description = "GitHub Token"
+regex = '''ghp_[0-9a-zA-Z]{36}'''
+
+[[rules]]
+id = "private-key"
+description = "Private Key"
+regex = '''-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----'''
+
+[allowlist]
+paths = [
+  '''.env.example''',
+  '''artifacts/'''
+]
