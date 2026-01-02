@@ -56,12 +56,22 @@ if ($MISSING -eq 1) {
 # Setup Git hooks
 Write-Host "🪝 Setting up Git hooks..." -ForegroundColor Green
 New-Item -ItemType Directory -Path ".git/hooks" -Force | Out-Null
-@"
-#!/bin/bash
+
+if ($IsWindows) {
+    $preCommitContent = @"
+#!/usr/bin/env pwsh
 npm run lint
 npm test
-"@ | Out-File -FilePath ".git/hooks/pre-commit" -Encoding UTF8
+"@
+} else {
+    $preCommitContent = @"
+#!/usr/bin/env bash
+npm run lint
+npm test
+"@
+}
 
+$preCommitContent | Out-File -FilePath ".git/hooks/pre-commit" -Encoding UTF8
 Write-Host "✅ Setup complete!" -ForegroundColor Green
 Write-Host "📖 Next steps:" -ForegroundColor Green
 Write-Host "  1. Add missing secrets (if any)"
