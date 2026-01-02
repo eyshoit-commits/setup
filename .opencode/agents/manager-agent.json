@@ -1,0 +1,25 @@
+{
+  "name": "manager-agent",
+  "version": "1.0.0",
+  "description": "Project management agent from @shuv1337/oc-manager",
+  "repository": "https://github.com/shuv1337/oc-manager",
+  "enabled": true,
+  "config": {
+    "taskTracking": true,
+    "milestoneManagement": true,
+    "issueIntegration": true,
+    "projectViews": ["kanban", "timeline", "list"],
+    "defaultView": "kanban",
+    "autoAssign": false
+  },
+  "integrations": {
+    "github": true,
+    "jira": false,
+    "linear": false
+  },
+  "permissions": {
+    "fileSystem": true,
+    "network": true,
+    "execution": false
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "version": "1.0.0",
+  "environments": {
+    "development": {
+      "name": "dev",
+      "description": "Development environment for testing and experimentation",
+      "protection": {
+        "enabled": false,
+        "requireApprovals": 0,
+        "waitTimer": 0
+      },
+      "deployment": {
+        "autoDeployment": true,
+        "branches": ["develop", "feature/*"],
+        "onPullRequest": true
+      },
+      "secrets": {
+        "prefix": "DEV_",
+        "required": [
+          "DEV_API_KEY",
+          "DEV_DATABASE_URL",
+          "DEV_SECRET_KEY"
+        ]
+      },
+      "variables": {
+        "NODE_ENV": "development",
+        "DEBUG": "true",
+        "LOG_LEVEL": "debug"
+      },
+      "urls": {
+        "base": "https://dev.example.com",
+        "api": "https://api-dev.example.com"
+      }
+    },
+    "ci": {
+      "name": "ci",
+      "description": "Continuous Integration environment",
+      "protection": {
+        "enabled": true,
+        "requireApprovals": 1,
+        "waitTimer": 0,
+        "reviewers": ["@devops-team"]
+      },
+      "deployment": {
+        "autoDeployment": true,
+        "branches": ["main"],
+        "onPullRequest": false
+      },
+      "secrets": {
+        "prefix": "CI_",
+        "required": [
+          "CI_API_KEY",
+          "CI_DATABASE_URL",
+          "CI_SECRET_KEY",
+          "CI_GITHUB_TOKEN"
+        ]
+      },
+      "variables": {
+        "NODE_ENV": "test",
+        "DEBUG": "false",
+        "LOG_LEVEL": "info"
+      },
+      "urls": {
+        "base": "https://ci.example.com",
+        "api": "https://api-ci.example.com"
+      }
+    },
+    "staging": {
+      "name": "staging",
+      "description": "Staging environment for pre-production testing",
+      "protection": {
+        "enabled": true,
+        "requireApprovals": 1,
+        "waitTimer": 300,
+        "reviewers": ["@eyshoit-commits", "@devops-team"]
+      },
+      "deployment": {
+        "autoDeployment": false,
+        "branches": ["main", "release/*"],
+        "onPullRequest": false
+      },
+      "secrets": {
+        "prefix": "STAGING_",
+        "required": [
+          "STAGING_API_KEY",
+          "STAGING_DATABASE_URL",
+          "STAGING_SECRET_KEY",
+          "STAGING_GITHUB_TOKEN",
+          "STAGING_SMTP_PASSWORD"
+        ]
+      },
+      "variables": {
+        "NODE_ENV": "staging",
+        "DEBUG": "false",
+        "LOG_LEVEL": "info"
+      },
+      "urls": {
+        "base": "https://staging.example.com",
+        "api": "https://api-staging.example.com"
+      }
+    },
+    "production": {
+      "name": "prod",
+      "description": "Production environment",
+      "protection": {
+        "enabled": true,
+        "requireApprovals": 2,
+        "waitTimer": 600,
+        "reviewers": ["@eyshoit-commits", "@security-team"],
+        "preventSelfReview": true
+      },
+      "deployment": {
+        "autoDeployment": false,
+        "branches": ["main"],
+        "onPullRequest": false,
+        "requireManualApproval": true
+      },
+      "secrets": {
+        "prefix": "PROD_",
+        "required": [
+          "PROD_API_KEY",
+          "PROD_DATABASE_URL",
+          "PROD_SECRET_KEY",
+          "PROD_GITHUB_TOKEN",
+          "PROD_SMTP_PASSWORD",
+          "PROD_AWS_ACCESS_KEY",
+          "PROD_AWS_SECRET_KEY"
+        ]
+      },
+      "variables": {
+        "NODE_ENV": "production",
+        "DEBUG": "false",
+        "LOG_LEVEL": "warn"
+      },
+      "urls": {
+        "base": "https://example.com",
+        "api": "https://api.example.com"
+      },
+      "monitoring": {
+        "enabled": true,
+        "alerting": true,
+        "healthChecks": true
+      },
+      "backup": {
+        "enabled": true,
+        "frequency": "daily",
+        "retention": "30d"
+      }
+    }
+  },
+  "deploymentStrategies": {
+    "rollout": {
+      "type": "blue-green",
+      "healthCheckTimeout": 300,
+      "rollbackOnFailure": true
+    },
+    "canary": {
+      "enabled": false,
+      "trafficPercent": 10,
+      "duration": 3600
+    }
+  },
+  "notifications": {
+    "deployment": {
+      "success": true,
+      "failure": true,
+      "channels": ["slack", "email"]
+    }
+  },
+  "commonSecrets": {
+    "github": {
+      "GITHUB_TOKEN": "GitHub Personal Access Token",
+      "GITHUB_OWNER": "eyshoit-commits",
+      "GITHUB_REPO": "setup"
+    },
+    "notifications": {
+      "SLACK_WEBHOOK_URL": "Slack webhook for notifications",
+      "SMTP_HOST": "SMTP server hostname",
+      "SMTP_PORT": "SMTP server port",
+      "SMTP_USER": "SMTP username"
+    }
+  }
+}

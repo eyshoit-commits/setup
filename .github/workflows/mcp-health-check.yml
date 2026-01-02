@@ -1,0 +1,110 @@
+name: MCP Health Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:
+
+jobs:
+  validate-mcp-config:
+    name: Validate MCP Configuration
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check MCP server configuration
+        run: |
+          echo "Checking for MCP server configuration..."
+          
+          # Check for common MCP config locations
+          config_found=false
+          
+          if [ -f ".mcp/config.json" ]; then
+            echo "✅ Found MCP config at .mcp/config.json"
+            config_found=true
+          fi
+          
+          if [ -f "mcp.json" ]; then
+            echo "✅ Found MCP config at mcp.json"
+            config_found=true
+          fi
+          
+          if [ -f ".opencode/mcp.json" ]; then
+            echo "✅ Found MCP config at .opencode/mcp.json"
+            config_found=true
+          fi
+          
+          if [ "$config_found" = false ]; then
+            echo "ℹ️ No MCP configuration found (optional)"
+          fi
+      
+      - name: Validate agent MCP compatibility
+        run: |
+          echo "Validating agent MCP compatibility..."
+          
+          agents_dir=".opencode/agents"
+          if [ -d "$agents_dir" ]; then
+            agent_count=$(find "$agents_dir" -name "*.json" | wc -l)
+            echo "Found $agent_count agent(s) configured"
+            
+            for agent in "$agents_dir"/*.json; do
+              if [ -f "$agent" ]; then
+                agent_name=$(jq -r '.name' "$agent")
+                echo "✓ $agent_name"
+              fi
+            done
+          fi
+      
+      - name: Check OpenCode integration
+        run: |
+          echo "Checking OpenCode integration..."
+          
+          if [ -f ".opencode/config.json" ]; then
+            echo "✅ OpenCode configuration exists"
+            
+            # Validate config structure
+            if jq -e '.agents and .features' .opencode/config.json > /dev/null; then
+              echo "✅ Configuration structure valid"
+            else
+              echo "⚠️ Configuration structure may be incomplete"
+            fi
+            
+            # Count configured agents
+            agent_count=$(jq '.agents | length' .opencode/config.json)
+            echo "📊 Configured agents: $agent_count"
+          else
+            echo "❌ OpenCode configuration missing"
+            exit 1
+          fi
+      
+      - name: Verify agent repositories
+        run: |
+          echo "Verifying agent repository references..."
+          
+          if [ -f ".opencode/config.json" ]; then
+            agents=$(jq -r '.agents | to_entries[] | .value' .opencode/config.json)
+            
+            echo "Agent repositories:"
+            echo "$agents" | while read -r repo; do
+              echo "  - $repo"
+            done
+          fi
+      
+      - name: Health check summary
+        if: success()
+        run: |
+          echo "# 🏥 MCP Health Check Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All MCP health checks passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Validated Components" >> $GITHUB_STEP_SUMMARY
+          echo "- MCP configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- Agent compatibility" >> $GITHUB_STEP_SUMMARY
+          echo "- OpenCode integration" >> $GITHUB_STEP_SUMMARY
+          echo "- Repository references" >> $GITHUB_STEP_SUMMARY

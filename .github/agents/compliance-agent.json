@@ -1,0 +1,68 @@
+{
+  "name": "compliance-agent",
+  "version": "1.0.0",
+  "description": "Policy and compliance enforcement agent",
+  "enabled": true,
+  "config": {
+    "checks": {
+      "commitFormat": {
+        "enabled": true,
+        "standard": "conventional-commits",
+        "enforceScope": true,
+        "maxLength": 72
+      },
+      "branchNaming": {
+        "enabled": true,
+        "pattern": "^(feature|fix|docs|refactor|perf|test|chore|security|hotfix)/[a-z0-9-]+$"
+      },
+      "prSize": {
+        "enabled": true,
+        "maxLines": 500,
+        "warningThreshold": 300
+      },
+      "codeowners": {
+        "enabled": true,
+        "requireApproval": true,
+        "enforceReviewers": true
+      },
+      "documentation": {
+        "enabled": true,
+        "requireUpdates": true,
+        "checkReadme": true
+      }
+    },
+    "policies": {
+      "enforceLinearHistory": true,
+      "requireSquashMerge": true,
+      "blockForcePush": true,
+      "requireSignedCommits": false
+    },
+    "validation": {
+      "configDrift": true,
+      "agentConsistency": true,
+      "workflowIntegrity": true
+    }
+  },
+  "responsibilities": [
+    "Enforce commit message format",
+    "Validate branch naming",
+    "Check PR compliance",
+    "Verify code owner approvals",
+    "Monitor configuration drift",
+    "Ensure policy adherence"
+  ],
+  "triggers": {
+    "onPush": true,
+    "onPullRequest": true,
+    "scheduled": "daily"
+  },
+  "integrations": {
+    "commitlint": true,
+    "branch-protection": true,
+    "status-checks": true
+  },
+  "permissions": {
+    "read": ["repository", "pull-requests", "contents"],
+    "write": ["checks", "statuses"]
+  }
+}

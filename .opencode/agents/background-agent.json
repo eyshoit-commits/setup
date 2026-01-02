@@ -1,0 +1,32 @@
+{
+  "name": "background-agent",
+  "version": "1.0.0",
+  "description": "Background processing agent from @zenobi-us/opencode-background",
+  "repository": "https://github.com/zenobi-us/opencode-background",
+  "enabled": true,
+  "config": {
+    "maxConcurrentTasks": 3,
+    "queueSize": 50,
+    "retryAttempts": 3,
+    "retryDelay": 5000,
+    "taskPriority": "normal",
+    "loggingLevel": "info"
+  },
+  "tasks": {
+    "codeAnalysis": true,
+    "linting": true,
+    "testing": false,
+    "buildOptimization": true,
+    "caching": true
+  },
+  "performance": {
+    "throttle": true,
+    "maxCpuUsage": 50,
+    "maxMemoryMB": 512
+  },
+  "permissions": {
+    "fileSystem": true,
+    "network": true,
+    "execution": true
+  }
+}

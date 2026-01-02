@@ -1,0 +1,39 @@
+{
+  "version": "1.0.0",
+  "agents": {
+    "skills": "@malhashemi/opencode-skills",
+    "sessions": "@malhashemi/opencode-sessions",
+    "manager": "@shuv1337/oc-manager",
+    "enhanced": "@code-yeongyu/oh-my-opencode",
+    "roadmap": "@IgorWarzocha/Opencode-Roadmap",
+    "background": "@zenobi-us/opencode-background",
+    "smart-title": "@Tarquinen/opencode-smart-title",
+    "notifications": "@pantheon-org/opencode-warcraft-notifications",
+    "context-analysis": "@IgorWarzocha/Opencode-Context-Analysis-Plugin",
+    "web": "@shuv1337/oc-web",
+    "theme": "@ajaxdude/opencode-ai-poimandres-theme",
+    "subagents": "@VoltAgent/awesome-claude-code-subagents",
+    "templates": "@darrenhinde/OpenAgents"
+  },
+  "features": {
+    "auto_sessions": true,
+    "smart_titles": true,
+    "context_analysis": true,
+    "background_tasks": true,
+    "roadmap_integration": true,
+    "notifications": true
+  },
+  "settings": {
+    "autoSave": true,
+    "telemetry": false,
+    "theme": "poimandres",
+    "notifications": {
+      "enabled": true,
+      "channels": ["desktop", "email"]
+    },
+    "performance": {
+      "cacheEnabled": true,
+      "maxConcurrentAgents": 5
+    }
+  }
+}

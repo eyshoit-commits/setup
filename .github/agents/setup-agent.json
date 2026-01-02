@@ -1,0 +1,39 @@
+{
+  "name": "setup-agent",
+  "version": "1.0.0",
+  "description": "Repository setup and initialization agent",
+  "enabled": true,
+  "config": {
+    "autoValidation": true,
+    "setupChecks": [
+      "directory-structure",
+      "configuration-files",
+      "workflows",
+      "policies",
+      "documentation"
+    ],
+    "validationMode": "strict",
+    "reportingLevel": "detailed"
+  },
+  "responsibilities": [
+    "Validate repository structure",
+    "Check configuration completeness",
+    "Verify workflow configurations",
+    "Ensure policy compliance",
+    "Generate setup reports"
+  ],
+  "triggers": {
+    "onPush": true,
+    "onPullRequest": true,
+    "scheduled": "daily"
+  },
+  "integrations": {
+    "github-actions": true,
+    "status-checks": true,
+    "notifications": true
+  },
+  "permissions": {
+    "read": ["repository", "workflows", "issues"],
+    "write": ["checks", "statuses"]
+  }
+}

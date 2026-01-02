@@ -1,0 +1,132 @@
+name: Setup Validation
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  validate-structure:
+    name: Validate Repository Structure
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Validate directory structure
+        run: |
+          echo "Validating required directories..."
+          
+          required_dirs=(
+            ".opencode"
+            ".opencode/agents"
+            ".github/workflows"
+            ".github/ISSUE_TEMPLATE"
+            ".github/agents"
+            ".vscode"
+            ".vscode/agents"
+            "scripts"
+            "config"
+            "docs"
+          )
+          
+          missing_dirs=()
+          for dir in "${required_dirs[@]}"; do
+            if [ ! -d "$dir" ]; then
+              missing_dirs+=("$dir")
+            fi
+          done
+          
+          if [ ${#missing_dirs[@]} -ne 0 ]; then
+            echo "❌ Missing required directories:"
+            printf '%s\n' "${missing_dirs[@]}"
+            exit 1
+          fi
+          
+          echo "✅ All required directories exist"
+      
+      - name: Validate configuration files
+        run: |
+          echo "Validating required configuration files..."
+          
+          required_files=(
+            ".opencode/config.json"
+            ".opencode/README.md"
+            ".github/CODEOWNERS"
+            ".github/SECURITY.md"
+            ".github/REPO-POLICY.md"
+            ".github/MERGE_STRATEGY.md"
+            ".github/dependabot.yml"
+            ".vscode/settings.json"
+            ".vscode/extensions.json"
+            "config/agents.config.json"
+            "config/security.config.json"
+            "config/environments.config.json"
+          )
+          
+          missing_files=()
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              missing_files+=("$file")
+            fi
+          done
+          
+          if [ ${#missing_files[@]} -ne 0 ]; then
+            echo "❌ Missing required files:"
+            printf '%s\n' "${missing_files[@]}"
+            exit 1
+          fi
+          
+          echo "✅ All required configuration files exist"
+      
+      - name: Validate JSON syntax
+        run: |
+          echo "Validating JSON files..."
+          
+          json_files=$(find . -name "*.json" -not -path "./node_modules/*" -not -path "./.git/*")
+          
+          invalid_files=()
+          for file in $json_files; do
+            if ! jq empty "$file" 2>/dev/null; then
+              invalid_files+=("$file")
+            fi
+          done
+          
+          if [ ${#invalid_files[@]} -ne 0 ]; then
+            echo "❌ Invalid JSON files:"
+            printf '%s\n' "${invalid_files[@]}"
+            exit 1
+          fi
+          
+          echo "✅ All JSON files are valid"
+      
+      - name: Validate agent configurations
+        run: |
+          echo "Validating agent configurations..."
+          
+          agent_files=(.opencode/agents/*.json .github/agents/*.json .vscode/agents/*.json)
+          
+          for file in "${agent_files[@]}"; do
+            if [ -f "$file" ]; then
+              if ! jq -e '.name and .version and .enabled != null' "$file" > /dev/null; then
+                echo "❌ Invalid agent config: $file"
+                exit 1
+              fi
+            fi
+          done
+          
+          echo "✅ All agent configurations are valid"
+      
+      - name: Summary
+        if: success()
+        run: |
+          echo "🎉 Setup validation passed successfully!"
+          echo ""
+          echo "Validated:"
+          echo "- Directory structure"
+          echo "- Configuration files"
+          echo "- JSON syntax"
+          echo "- Agent configurations"

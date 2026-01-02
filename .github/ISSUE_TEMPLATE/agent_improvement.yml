@@ -1,0 +1,139 @@
+name: 🤖 Agent Improvement
+description: Suggest an improvement or enhancement for an OpenCode agent
+title: "[Agent]: "
+labels: ["enhancement", "agent", "needs-review"]
+assignees:
+  - eyshoit-commits
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting an agent improvement! Your feedback helps make our agents better.
+
+  - type: dropdown
+    id: agent-type
+    attributes:
+      label: Agent Type
+      description: Which agent does this improvement relate to?
+      options:
+        - Skills Agent (@malhashemi/opencode-skills)
+        - Sessions Agent (@malhashemi/opencode-sessions)
+        - Manager Agent (@shuv1337/oc-manager)
+        - Enhanced Agent (@code-yeongyu/oh-my-opencode)
+        - Roadmap Agent (@IgorWarzocha/Opencode-Roadmap)
+        - Background Agent (@zenobi-us/opencode-background)
+        - Smart Title Agent (@Tarquinen/opencode-smart-title)
+        - Notifications Agent (@pantheon-org/opencode-warcraft-notifications)
+        - Context Analysis Agent (@IgorWarzocha/Opencode-Context-Analysis-Plugin)
+        - Web Agent (@shuv1337/oc-web)
+        - Theme Agent (@ajaxdude/opencode-ai-poimandres-theme)
+        - Subagents Agent (@VoltAgent/awesome-claude-code-subagents)
+        - Templates Agent (@darrenhinde/OpenAgents)
+        - Setup Agent (.github/agents/setup-agent)
+        - Security Agent (.github/agents/security-agent)
+        - Compliance Agent (.github/agents/compliance-agent)
+        - Dev Agent (.vscode/agents/dev-agent)
+        - Debug Agent (.vscode/agents/debug-agent)
+        - Test Agent (.vscode/agents/test-agent)
+        - New Agent (proposal)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: improvement-type
+    attributes:
+      label: Improvement Type
+      description: What type of improvement is this?
+      options:
+        - New Feature
+        - Performance Enhancement
+        - Better Integration
+        - Configuration Option
+        - Documentation
+        - Bug Fix
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-limitation
+    attributes:
+      label: Current Limitation
+      description: What is the current limitation or issue with the agent?
+      placeholder: Describe what the agent currently cannot do or does poorly
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-enhancement
+    attributes:
+      label: Proposed Enhancement
+      description: What enhancement are you proposing?
+      placeholder: Describe the improvement in detail
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: What is the use case for this enhancement?
+      placeholder: |
+        Describe scenarios where this enhancement would be valuable:
+        - When...
+        - During...
+        - To enable...
+    validations:
+      required: true
+
+  - type: textarea
+    id: benefits
+    attributes:
+      label: Expected Benefits
+      description: What benefits will this enhancement provide?
+      placeholder: |
+        - Improved performance by...
+        - Better developer experience through...
+        - Reduced errors by...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this enhancement?
+      options:
+        - Critical (Blocks workflow)
+        - High (Significant impact)
+        - Medium (Nice to have)
+        - Low (Minor improvement)
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What alternatives have you considered?
+      placeholder: Describe other approaches or workarounds you've thought about
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation Ideas
+      description: Do you have ideas on how this could be implemented?
+      placeholder: Share any technical implementation ideas (optional)
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to contribute this enhancement
+          required: false
+        - label: I have reviewed existing agent capabilities
+          required: true
+        - label: This enhancement does not duplicate existing functionality
+          required: true

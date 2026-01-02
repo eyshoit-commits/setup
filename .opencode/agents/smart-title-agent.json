@@ -1,0 +1,27 @@
+{
+  "name": "smart-title-agent",
+  "version": "1.0.0",
+  "description": "Smart title generation agent from @Tarquinen/opencode-smart-title",
+  "repository": "https://github.com/Tarquinen/opencode-smart-title",
+  "enabled": true,
+  "config": {
+    "autoGenerate": true,
+    "conventionalCommits": true,
+    "maxLength": 72,
+    "includeScope": true,
+    "includeType": true,
+    "intelligentSummary": true
+  },
+  "formats": {
+    "commit": "<type>(<scope>): <description>",
+    "pr": "[<type>] <description>",
+    "issue": "<emoji> <description>"
+  },
+  "types": ["feat", "fix", "docs", "style", "refactor", "perf", "test", "chore", "ci"],
+  "scopes": ["core", "api", "ui", "docs", "config", "deps", "ci"],
+  "permissions": {
+    "fileSystem": true,
+    "network": false,
+    "execution": false
+  }
+}

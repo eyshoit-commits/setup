@@ -1,0 +1,82 @@
+name: Dependabot Auto-Merge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: Auto-Merge Dependabot PRs
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+      
+      - name: Auto-approve patch and minor updates
+        if: |
+          steps.dependabot-metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.dependabot-metadata.outputs.update-type == 'version-update:semver-minor'
+        run: |
+          gh pr review --approve "${{ github.event.pull_request.html_url }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Wait for status checks
+        if: |
+          steps.dependabot-metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.dependabot-metadata.outputs.update-type == 'version-update:semver-minor'
+        run: |
+          echo "Waiting for status checks to complete..."
+          sleep 30
+      
+      - name: Enable auto-merge
+        if: |
+          steps.dependabot-metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.dependabot-metadata.outputs.update-type == 'version-update:semver-minor'
+        run: |
+          gh pr merge --auto --squash "${{ github.event.pull_request.html_url }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Comment on major updates
+        if: steps.dependabot-metadata.outputs.update-type == 'version-update:semver-major'
+        run: |
+          gh pr comment "${{ github.event.pull_request.html_url }}" --body \
+            "⚠️ **Major version update detected!**
+            
+            This update requires manual review and approval.
+            
+            **Update type:** ${{ steps.dependabot-metadata.outputs.update-type }}
+            **Dependency:** ${{ steps.dependabot-metadata.outputs.dependency-names }}
+            
+            Please review the changelog and test thoroughly before merging."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Summary
+        if: always()
+        run: |
+          echo "# 🤖 Dependabot Auto-Merge Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**PR:** ${{ github.event.pull_request.html_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Update Type:** ${{ steps.dependabot-metadata.outputs.update-type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Dependency:** ${{ steps.dependabot-metadata.outputs.dependency-names }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ steps.dependabot-metadata.outputs.update-type }}" =~ ^version-update:semver-(patch|minor)$ ]]; then
+            echo "✅ Auto-merge enabled (patch/minor update)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Manual review required (major update)" >> $GITHUB_STEP_SUMMARY
+          fi

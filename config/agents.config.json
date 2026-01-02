@@ -1,0 +1,137 @@
+{
+  "version": "1.0.0",
+  "agents": {
+    "opencode": {
+      "skills": {
+        "repository": "@malhashemi/opencode-skills",
+        "enabled": true,
+        "priority": "high",
+        "autoLoad": true
+      },
+      "sessions": {
+        "repository": "@malhashemi/opencode-sessions",
+        "enabled": true,
+        "priority": "high",
+        "autoLoad": true
+      },
+      "manager": {
+        "repository": "@shuv1337/oc-manager",
+        "enabled": true,
+        "priority": "normal",
+        "autoLoad": true
+      },
+      "enhanced": {
+        "repository": "@code-yeongyu/oh-my-opencode",
+        "enabled": true,
+        "priority": "normal",
+        "autoLoad": true
+      },
+      "roadmap": {
+        "repository": "@IgorWarzocha/Opencode-Roadmap",
+        "enabled": true,
+        "priority": "normal",
+        "autoLoad": false
+      },
+      "background": {
+        "repository": "@zenobi-us/opencode-background",
+        "enabled": true,
+        "priority": "low",
+        "autoLoad": true
+      },
+      "smart-title": {
+        "repository": "@Tarquinen/opencode-smart-title",
+        "enabled": true,
+        "priority": "normal",
+        "autoLoad": true
+      },
+      "notifications": {
+        "repository": "@pantheon-org/opencode-warcraft-notifications",
+        "enabled": true,
+        "priority": "low",
+        "autoLoad": false
+      },
+      "context-analysis": {
+        "repository": "@IgorWarzocha/Opencode-Context-Analysis-Plugin",
+        "enabled": true,
+        "priority": "high",
+        "autoLoad": true
+      },
+      "web": {
+        "repository": "@shuv1337/oc-web",
+        "enabled": false,
+        "priority": "low",
+        "autoLoad": false
+      },
+      "theme": {
+        "repository": "@ajaxdude/opencode-ai-poimandres-theme",
+        "enabled": true,
+        "priority": "low",
+        "autoLoad": true
+      },
+      "subagents": {
+        "repository": "@VoltAgent/awesome-claude-code-subagents",
+        "enabled": true,
+        "priority": "high",
+        "autoLoad": true
+      },
+      "templates": {
+        "repository": "@darrenhinde/OpenAgents",
+        "enabled": true,
+        "priority": "normal",
+        "autoLoad": false
+      }
+    },
+    "github": {
+      "setup": {
+        "configPath": ".github/agents/setup-agent.json",
+        "enabled": true,
+        "triggers": ["push", "pull_request", "schedule"]
+      },
+      "security": {
+        "configPath": ".github/agents/security-agent.json",
+        "enabled": true,
+        "triggers": ["push", "pull_request", "schedule"]
+      },
+      "compliance": {
+        "configPath": ".github/agents/compliance-agent.json",
+        "enabled": true,
+        "triggers": ["push", "pull_request"]
+      }
+    },
+    "vscode": {
+      "dev": {
+        "configPath": ".vscode/agents/dev-agent.json",
+        "enabled": true,
+        "autoStart": true
+      },
+      "debug": {
+        "configPath": ".vscode/agents/debug-agent.json",
+        "enabled": true,
+        "autoStart": false
+      },
+      "test": {
+        "configPath": ".vscode/agents/test-agent.json",
+        "enabled": true,
+        "autoStart": false
+      }
+    }
+  },
+  "settings": {
+    "orchestration": {
+      "maxConcurrentAgents": 5,
+      "loadBalancing": true,
+      "failover": true
+    },
+    "communication": {
+      "messageQueue": true,
+      "sharedContext": true,
+      "eventBus": true
+    },
+    "monitoring": {
+      "enabled": true,
+      "healthChecks": true,
+      "performanceMetrics": true,
+      "logLevel": "info"
+    }
+  }
+}

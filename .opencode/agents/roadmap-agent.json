@@ -1,0 +1,26 @@
+{
+  "name": "roadmap-agent",
+  "version": "1.0.0",
+  "description": "Roadmap visualization agent from @IgorWarzocha/Opencode-Roadmap",
+  "repository": "https://github.com/IgorWarzocha/Opencode-Roadmap",
+  "enabled": true,
+  "config": {
+    "visualizationMode": "interactive",
+    "timelineView": true,
+    "milestoneTracking": true,
+    "dependencyMapping": true,
+    "autoUpdate": true,
+    "exportFormats": ["svg", "png", "pdf"]
+  },
+  "display": {
+    "theme": "dark",
+    "compactMode": false,
+    "showProgress": true,
+    "highlightBlockers": true
+  },
+  "permissions": {
+    "fileSystem": true,
+    "network": false,
+    "execution": false
+  }
+}

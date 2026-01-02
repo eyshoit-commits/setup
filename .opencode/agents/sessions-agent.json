@@ -1,0 +1,24 @@
+{
+  "name": "sessions-agent",
+  "version": "1.0.0",
+  "description": "Session management agent from @malhashemi/opencode-sessions",
+  "repository": "https://github.com/malhashemi/opencode-sessions",
+  "enabled": true,
+  "config": {
+    "autoSave": true,
+    "sessionTimeout": 3600,
+    "maxSessions": 10,
+    "persistenceMode": "auto",
+    "historyLimit": 100
+  },
+  "permissions": {
+    "fileSystem": true,
+    "network": false,
+    "execution": false
+  },
+  "storage": {
+    "location": ".opencode/sessions",
+    "format": "json",
+    "compression": true
+  }
+}
