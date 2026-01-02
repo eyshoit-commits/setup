@@ -1,0 +1,55 @@
+{
+  "name": "debug-agent",
+  "version": "1.0.0",
+  "description": "Debugging assistance and troubleshooting agent",
+  "enabled": true,
+  "config": {
+    "breakpoints": {
+      "intelligent": true,
+      "conditional": true,
+      "logPoints": true
+    },
+    "inspection": {
+      "deepInspection": true,
+      "watchExpressions": true,
+      "callStack": true
+    },
+    "analysis": {
+      "performanceProfile": true,
+      "memoryLeakDetection": true,
+      "errorAnalysis": true
+    },
+    "suggestions": {
+      "fixRecommendations": true,
+      "rootCauseAnalysis": true
+    }
+  },
+  "features": {
+    "stepThrough": true,
+    "variableInspection": true,
+    "consoleEvaluation": true,
+    "exceptionBreakpoints": true
+  },
+  "debuggers": {
+    "node": true,
+    "python": true,
+    "go": true,
+    "rust": true,
+    "chrome": true
+  },
+  "triggers": {
+    "onDebugStart": true,
+    "onException": true,
+    "onBreakpoint": true
+  },
+  "integrations": {
+    "vscode-debugger": true,
+    "chrome-devtools": true,
+    "logging": true
+  },
+  "permissions": {
+    "fileSystem": true,
+    "network": true,
+    "execution": true
+  }
+}

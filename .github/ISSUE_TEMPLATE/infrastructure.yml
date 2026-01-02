@@ -1,0 +1,190 @@
+name: 🏗️ Infrastructure Change
+description: Propose infrastructure, configuration, or deployment changes
+title: "[Infrastructure]: "
+labels: ["infrastructure", "needs-review"]
+assignees:
+  - eyshoit-commits
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for infrastructure, configuration, or deployment changes.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which infrastructure component does this affect?
+      options:
+        - GitHub Actions Workflows
+        - Branch Protection Rules
+        - Repository Settings
+        - Security Configuration
+        - Dependabot Configuration
+        - Environment Configuration
+        - Agent Configuration
+        - CI/CD Pipeline
+        - Deployment Scripts
+        - Automation Scripts
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: change-type
+    attributes:
+      label: Change Type
+      description: What type of change is this?
+      options:
+        - New Infrastructure
+        - Configuration Update
+        - Deprecation
+        - Migration
+        - Optimization
+        - Security Hardening
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Change Description
+      description: Detailed description of the proposed infrastructure change
+      placeholder: Describe what you want to change and why
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why is this change necessary?
+      placeholder: |
+        - Current problem/limitation
+        - Business/technical need
+        - Benefits of the change
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact Assessment
+      description: What is the impact of this change?
+      placeholder: |
+        **Affected Systems:**
+        - System 1
+        - System 2
+        
+        **Downstream Effects:**
+        - Effect 1
+        - Effect 2
+        
+        **Users Affected:**
+        - Who will be affected
+    validations:
+      required: true
+
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Risk Level
+      description: What is the risk level of this change?
+      options:
+        - Low (Minimal impact, easy rollback)
+        - Medium (Moderate impact, standard rollback)
+        - High (Significant impact, complex rollback)
+        - Critical (Major impact, difficult rollback)
+    validations:
+      required: true
+
+  - type: textarea
+    id: testing
+    attributes:
+      label: Testing Plan
+      description: How will this change be tested?
+      placeholder: |
+        1. Test in dev environment
+        2. Validate with CI pipeline
+        3. Verify in staging
+        4. Monitor in production
+    validations:
+      required: true
+
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback Plan
+      description: How can this change be rolled back if needed?
+      placeholder: |
+        1. Step to revert change
+        2. Recovery procedure
+        3. Data restoration (if applicable)
+        4. Verification steps
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation Steps
+      description: What are the steps to implement this change?
+      placeholder: |
+        1. First step
+        2. Second step
+        3. Third step
+    validations:
+      required: true
+
+  - type: dropdown
+    id: downtime
+    attributes:
+      label: Downtime Required
+      description: Will this change require downtime?
+      options:
+        - No downtime
+        - Minimal (<5 minutes)
+        - Short (5-30 minutes)
+        - Extended (>30 minutes)
+        - Maintenance window required
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Are there any dependencies or prerequisites?
+      placeholder: |
+        - Dependency 1
+        - Dependency 2
+        - Required approvals
+
+  - type: textarea
+    id: timeline
+    attributes:
+      label: Proposed Timeline
+      description: What is the proposed implementation timeline?
+      placeholder: |
+        - Planning: Week 1
+        - Implementation: Week 2
+        - Testing: Week 3
+        - Deployment: Week 4
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-Implementation Checklist
+      options:
+        - label: Impact assessment completed
+          required: true
+        - label: Rollback plan documented
+          required: true
+        - label: Testing plan defined
+          required: true
+        - label: Security implications reviewed
+          required: true
+        - label: Stakeholders notified
+          required: false

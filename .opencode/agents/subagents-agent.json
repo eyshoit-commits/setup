@@ -1,0 +1,46 @@
+{
+  "name": "subagents-agent",
+  "version": "1.0.0",
+  "description": "Subagent patterns from @VoltAgent/awesome-claude-code-subagents",
+  "repository": "https://github.com/VoltAgent/awesome-claude-code-subagents",
+  "enabled": true,
+  "config": {
+    "orchestrationMode": "dynamic",
+    "maxSubagents": 5,
+    "autoSpawn": true,
+    "loadBalancing": true,
+    "failoverEnabled": true
+  },
+  "subagentTypes": {
+    "planner": {
+      "enabled": true,
+      "priority": "high",
+      "maxInstances": 1
+    },
+    "implementer": {
+      "enabled": true,
+      "priority": "normal",
+      "maxInstances": 3
+    },
+    "reviewer": {
+      "enabled": true,
+      "priority": "high",
+      "maxInstances": 2
+    },
+    "tester": {
+      "enabled": true,
+      "priority": "normal",
+      "maxInstances": 2
+    }
+  },
+  "coordination": {
+    "messageQueue": true,
+    "sharedContext": true,
+    "conflictResolution": "merge"
+  },
+  "permissions": {
+    "fileSystem": true,
+    "network": true,
+    "execution": true
+  }
+}

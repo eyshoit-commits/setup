@@ -1,0 +1,131 @@
+name: 🔐 Security Finding
+description: Report a security vulnerability (private disclosure recommended)
+title: "[Security]: "
+labels: ["security", "critical"]
+assignees:
+  - eyshoit-commits
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚠️ Security Disclosure
+        
+        **IMPORTANT:** For sensitive security issues, please use GitHub's private vulnerability reporting feature instead of creating a public issue.
+        
+        Navigate to: Security → Report a vulnerability
+        
+        Only use this template for security findings that are already public or low severity.
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this security finding?
+      options:
+        - Critical (Immediate action required)
+        - High (Action required within 72 hours)
+        - Medium (Action required within 7 days)
+        - Low (Action required within 30 days)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What type of security issue is this?
+      options:
+        - Authentication/Authorization
+        - Data Exposure
+        - Injection Attack
+        - Cross-Site Scripting (XSS)
+        - Cross-Site Request Forgery (CSRF)
+        - Cryptographic Weakness
+        - Dependency Vulnerability
+        - Configuration Issue
+        - Supply Chain
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Vulnerability Description
+      description: Detailed description of the security vulnerability
+      placeholder: Describe the vulnerability in detail
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact Assessment
+      description: What is the potential impact of this vulnerability?
+      placeholder: |
+        - Data that could be exposed
+        - Systems that could be compromised
+        - Attack vectors
+        - Potential damage
+    validations:
+      required: true
+
+  - type: textarea
+    id: exploitation
+    attributes:
+      label: Exploitation Details
+      description: How can this vulnerability be exploited? (Be careful with sensitive details)
+      placeholder: Describe exploitation steps (avoid providing working exploits in public issues)
+
+  - type: textarea
+    id: affected
+    attributes:
+      label: Affected Components
+      description: Which components, files, or systems are affected?
+      placeholder: List affected components
+    validations:
+      required: true
+
+  - type: textarea
+    id: remediation
+    attributes:
+      label: Proposed Remediation
+      description: How should this vulnerability be fixed?
+      placeholder: Suggest remediation steps
+
+  - type: dropdown
+    id: timeline
+    attributes:
+      label: Remediation Timeline
+      description: What timeline is expected for remediation?
+      options:
+        - Immediate (0-24 hours)
+        - Urgent (1-3 days)
+        - High Priority (4-7 days)
+        - Normal (1-4 weeks)
+        - Low Priority (1-3 months)
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: CVEs, advisories, or other references
+      placeholder: |
+        - CVE-XXXX-XXXXX
+        - https://...
+        - Related issues
+
+  - type: checkboxes
+    id: disclosure
+    attributes:
+      label: Disclosure Checklist
+      options:
+        - label: This is not a sensitive security issue requiring private disclosure
+          required: true
+        - label: I have followed responsible disclosure practices
+          required: true
+        - label: I have not included working exploits in this public report
+          required: true

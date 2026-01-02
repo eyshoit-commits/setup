@@ -1,0 +1,52 @@
+# Code Owners
+
+# Global owners - all files
+* @eyshoit-commits
+
+# Scripts & Automation
+/scripts/ @eyshoit-commits @devops-team
+/scripts/*.sh @eyshoit-commits @devops-team
+/scripts/*.ps1 @eyshoit-commits @devops-team
+
+# Configuration Files
+/config/ @eyshoit-commits @security-team
+/config/*.json @eyshoit-commits @security-team
+/.github/ @eyshoit-commits @security-team
+/.github/workflows/ @eyshoit-commits @devops-team
+/.github/ISSUE_TEMPLATE/ @eyshoit-commits @documentation-team
+
+# OpenCode Agents
+/.opencode/ @eyshoit-commits @agent-team
+/.opencode/agents/ @eyshoit-commits @agent-team
+/.opencode/config.json @eyshoit-commits @agent-team @security-team
+
+# GitHub Agents
+/.github/agents/ @eyshoit-commits @agent-team @security-team
+
+# VSCode Configuration
+/.vscode/ @eyshoit-commits @developer-experience-team
+/.vscode/agents/ @eyshoit-commits @agent-team
+
+# Documentation
+/docs/ @eyshoit-commits @documentation-team
+/docs/*.md @eyshoit-commits @documentation-team
+README.md @eyshoit-commits @documentation-team
+
+# Security Policies
+/SECURITY.md @eyshoit-commits @security-team
+/.github/SECURITY.md @eyshoit-commits @security-team
+/.github/REPO-POLICY.md @eyshoit-commits @security-team
+/.github/MERGE_STRATEGY.md @eyshoit-commits @security-team
+/config/security.config.json @eyshoit-commits @security-team
+
+# CI/CD and Workflows
+/.github/workflows/*.yml @eyshoit-commits @devops-team @security-team
+
+# Dependabot Configuration
+/.github/dependabot.yml @eyshoit-commits @security-team @devops-team
+
+# Environment Configuration
+/config/environments.config.json @eyshoit-commits @devops-team @security-team
+
+# Agent Configuration
+/config/agents.config.json @eyshoit-commits @agent-team

@@ -1,0 +1,51 @@
+{
+  "name": "dev-agent",
+  "version": "1.0.0",
+  "description": "Development assistance and code generation agent",
+  "enabled": true,
+  "config": {
+    "codeGeneration": {
+      "enabled": true,
+      "languages": ["javascript", "typescript", "python", "go", "rust", "bash"],
+      "templates": true,
+      "snippets": true
+    },
+    "intellisense": {
+      "enhanced": true,
+      "contextAware": true,
+      "suggestions": "aggressive"
+    },
+    "refactoring": {
+      "enabled": true,
+      "autoSuggest": true,
+      "safeRefactor": true
+    },
+    "formatting": {
+      "onSave": true,
+      "onType": false,
+      "provider": "auto"
+    }
+  },
+  "features": {
+    "autoComplete": true,
+    "errorDetection": true,
+    "quickFixes": true,
+    "codeActions": true,
+    "hoverInfo": true
+  },
+  "triggers": {
+    "onEdit": true,
+    "onSave": true,
+    "manual": true
+  },
+  "integrations": {
+    "lsp": true,
+    "debugger": true,
+    "git": true
+  },
+  "permissions": {
+    "fileSystem": true,
+    "network": true,
+    "execution": false
+  }
+}

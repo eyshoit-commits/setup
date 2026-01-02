@@ -1,0 +1,59 @@
+{
+  "name": "security-agent",
+  "version": "1.0.0",
+  "description": "Security scanning and vulnerability detection agent",
+  "enabled": true,
+  "config": {
+    "scanners": {
+      "trivy": {
+        "enabled": true,
+        "severity": ["CRITICAL", "HIGH", "MEDIUM"],
+        "scanType": ["filesystem", "config"]
+      },
+      "trufflehog": {
+        "enabled": true,
+        "onlyVerified": true,
+        "scanHistory": true
+      },
+      "codeql": {
+        "enabled": true,
+        "languages": ["javascript", "typescript", "python", "go"]
+      },
+      "dependencyCheck": {
+        "enabled": true,
+        "autoFix": "patch"
+      }
+    },
+    "policies": {
+      "blockOnCritical": true,
+      "blockOnHighSeverity": true,
+      "requireReview": "always"
+    },
+    "reporting": {
+      "sarif": true,
+      "summary": true,
+      "notifications": true
+    }
+  },
+  "responsibilities": [
+    "Scan for vulnerabilities",
+    "Detect secrets and credentials",
+    "Analyze code for security issues",
+    "Monitor dependencies",
+    "Generate security reports"
+  ],
+  "triggers": {
+    "onPush": true,
+    "onPullRequest": true,
+    "scheduled": "weekly"
+  },
+  "integrations": {
+    "github-security": true,
+    "sarif-upload": true,
+    "advisories": true
+  },
+  "permissions": {
+    "read": ["repository", "security-events"],
+    "write": ["security-events", "checks"]
+  }
+}

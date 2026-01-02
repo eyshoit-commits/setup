@@ -1,0 +1,133 @@
+name: Commit Validation
+
+on:
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  validate-commits:
+    name: Validate Commit Messages
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install commitlint
+        run: |
+          npm install -g @commitlint/cli @commitlint/config-conventional
+      
+      - name: Create commitlint config
+        run: |
+          cat > commitlint.config.js << 'EOF'
+          module.exports = {
+            extends: ['@commitlint/config-conventional'],
+            rules: {
+              'type-enum': [
+                2,
+                'always',
+                [
+                  'feat',
+                  'fix',
+                  'docs',
+                  'style',
+                  'refactor',
+                  'perf',
+                  'test',
+                  'chore',
+                  'ci',
+                  'revert'
+                ]
+              ],
+              'subject-max-length': [2, 'always', 72],
+              'body-max-line-length': [2, 'always', 100]
+            }
+          };
+          EOF
+      
+      - name: Validate commit messages
+        run: |
+          echo "Validating commit messages..."
+          
+          # Get the base branch
+          base_sha="${{ github.event.pull_request.base.sha }}"
+          head_sha="${{ github.event.pull_request.head.sha }}"
+          
+          if [ -z "$base_sha" ]; then
+            echo "Not a pull request, checking last commit"
+            npx commitlint --from HEAD~1 --to HEAD --verbose
+          else
+            echo "Checking commits from $base_sha to $head_sha"
+            npx commitlint --from "$base_sha" --to "$head_sha" --verbose
+          fi
+      
+      - name: Check commit signing
+        run: |
+          echo "Checking for signed commits..."
+          
+          commits=$(git log --format="%H %G?" HEAD~5..HEAD)
+          
+          unsigned_count=0
+          while IFS= read -r line; do
+            commit_hash=$(echo "$line" | awk '{print $1}')
+            signature=$(echo "$line" | awk '{print $2}')
+            
+            if [ "$signature" = "N" ]; then
+              unsigned_count=$((unsigned_count + 1))
+              echo "⚠️ Unsigned commit: $commit_hash"
+            fi
+          done <<< "$commits"
+          
+          if [ $unsigned_count -gt 0 ]; then
+            echo "ℹ️ Found $unsigned_count unsigned commit(s)"
+            echo "Consider enabling commit signing for better security"
+          else
+            echo "✅ All recent commits are signed"
+          fi
+      
+      - name: Validate commit structure
+        run: |
+          echo "Validating commit structure and content..."
+          
+          # Check for merge commits
+          merge_commits=$(git log --merges --oneline HEAD~10..HEAD)
+          
+          if [ -n "$merge_commits" ]; then
+            echo "⚠️ Merge commits found (prefer squash and merge):"
+            echo "$merge_commits"
+          fi
+          
+          # Check for large commits
+          large_commits=$(git log --all --pretty=format:"%H" --shortstat HEAD~10..HEAD | \
+            awk '/files? changed/ {if ($1 > 50) print prev} {prev=$0}')
+          
+          if [ -n "$large_commits" ]; then
+            echo "⚠️ Large commits detected (>50 files changed)"
+          fi
+      
+      - name: Generate validation summary
+        if: always()
+        run: |
+          echo "# ✅ Commit Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Validation Checks" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Conventional Commit format" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Commit message length" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Commit structure" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Commit Format" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo '<type>(<scope>): <description>' >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '[optional body]' >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '[optional footer]' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

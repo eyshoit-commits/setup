@@ -1,0 +1,141 @@
+name: Configuration Drift Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM
+  workflow_dispatch:
+
+jobs:
+  drift-detection:
+    name: Detect Configuration Drift
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check for configuration changes
+        id: config-changes
+        run: |
+          echo "Checking for configuration changes..."
+          
+          config_files=(
+            ".opencode/config.json"
+            ".github/workflows/*.yml"
+            "config/*.json"
+            ".vscode/settings.json"
+          )
+          
+          changes_detected=false
+          
+          if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -E '(config|\.json|\.yml)$'; then
+            changes_detected=true
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Validate agent consistency
+        run: |
+          echo "Validating agent consistency across configurations..."
+          
+          # Check if agents in .opencode/config.json match agent files
+          if [ -f ".opencode/config.json" ]; then
+            config_agents=$(jq -r '.agents | keys[]' .opencode/config.json | sort)
+            
+            echo "Agents in config.json:"
+            echo "$config_agents"
+            
+            # Check for orphaned agent files
+            if [ -d ".opencode/agents" ]; then
+              for agent_file in .opencode/agents/*.json; do
+                if [ -f "$agent_file" ]; then
+                  agent_name=$(jq -r '.name' "$agent_file")
+                  echo "Found agent file: $agent_name"
+                fi
+              done
+            fi
+          fi
+      
+      - name: Check workflow consistency
+        run: |
+          echo "Checking workflow file consistency..."
+          
+          required_workflows=(
+            "setup-validation.yml"
+            "security-scan.yml"
+            "mcp-health-check.yml"
+            "drift-check.yml"
+            "commit-validation.yml"
+            "dependabot-auto-merge.yml"
+          )
+          
+          missing_workflows=()
+          for workflow in "${required_workflows[@]}"; do
+            if [ ! -f ".github/workflows/$workflow" ]; then
+              missing_workflows+=("$workflow")
+            fi
+          done
+          
+          if [ ${#missing_workflows[@]} -ne 0 ]; then
+            echo "⚠️ Missing workflows:"
+            printf '%s\n' "${missing_workflows[@]}"
+          else
+            echo "✅ All required workflows present"
+          fi
+      
+      - name: Validate environment configs
+        run: |
+          echo "Validating environment configurations..."
+          
+          if [ -f "config/environments.config.json" ]; then
+            envs=$(jq -r '.environments | keys[]' config/environments.config.json)
+            echo "Configured environments:"
+            echo "$envs" | while read -r env; do
+              echo "  - $env"
+            done
+          fi
+      
+      - name: Check for security drift
+        run: |
+          echo "Checking for security configuration drift..."
+          
+          if [ -f "config/security.config.json" ]; then
+            echo "✅ Security configuration exists"
+            
+            # Validate security settings
+            if jq -e '.branchProtection and .secretScanning and .dependencyScanning' config/security.config.json > /dev/null; then
+              echo "✅ Core security settings configured"
+            else
+              echo "⚠️ Some security settings may be missing"
+            fi
+          else
+            echo "⚠️ Security configuration not found"
+          fi
+      
+      - name: Generate drift report
+        if: always()
+        run: |
+          echo "# 🔍 Configuration Drift Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Generated:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.config-changes.outputs.changes }}" = "true" ]; then
+            echo "⚠️ Configuration changes detected in this commit" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No configuration drift detected" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Checked Components" >> $GITHUB_STEP_SUMMARY
+          echo "- Agent configurations" >> $GITHUB_STEP_SUMMARY
+          echo "- Workflow files" >> $GITHUB_STEP_SUMMARY
+          echo "- Environment configs" >> $GITHUB_STEP_SUMMARY
+          echo "- Security settings" >> $GITHUB_STEP_SUMMARY

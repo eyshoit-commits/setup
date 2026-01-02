@@ -1,0 +1,65 @@
+{
+  "name": "test-agent",
+  "version": "1.0.0",
+  "description": "Test generation and execution agent",
+  "enabled": true,
+  "config": {
+    "testGeneration": {
+      "enabled": true,
+      "frameworks": ["jest", "mocha", "pytest", "go-test", "cargo-test"],
+      "coverage": true,
+      "mocking": true
+    },
+    "testExecution": {
+      "autoRun": false,
+      "watchMode": true,
+      "parallel": true,
+      "failFast": false
+    },
+    "coverage": {
+      "enabled": true,
+      "threshold": 80,
+      "reportFormat": ["html", "lcov", "text"],
+      "excludePatterns": ["**/*.test.*", "**/node_modules/**"]
+    },
+    "assertions": {
+      "strictMode": true,
+      "customMatchers": true
+    }
+  },
+  "features": {
+    "unitTests": true,
+    "integrationTests": true,
+    "e2eTests": true,
+    "snapshotTests": true,
+    "performanceTests": false
+  },
+  "runners": {
+    "jest": {
+      "enabled": true,
+      "config": "jest.config.js"
+    },
+    "pytest": {
+      "enabled": true,
+      "config": "pytest.ini"
+    },
+    "goTest": {
+      "enabled": true
+    }
+  },
+  "triggers": {
+    "onSave": false,
+    "beforeCommit": true,
+    "manual": true
+  },
+  "integrations": {
+    "coverage-gutters": true,
+    "test-explorer": true,
+    "ci-integration": true
+  },
+  "permissions": {
+    "fileSystem": true,
+    "network": false,
+    "execution": true
+  }
+}

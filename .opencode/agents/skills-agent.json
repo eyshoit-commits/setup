@@ -1,0 +1,29 @@
+{
+  "name": "skills-agent",
+  "version": "1.0.0",
+  "description": "Custom skills and tools agent from @malhashemi/opencode-skills",
+  "repository": "https://github.com/malhashemi/opencode-skills",
+  "enabled": true,
+  "config": {
+    "autoLoad": true,
+    "skillCategories": [
+      "code-analysis",
+      "refactoring",
+      "documentation",
+      "testing",
+      "deployment"
+    ],
+    "customSkills": [],
+    "priority": "high"
+  },
+  "permissions": {
+    "fileSystem": true,
+    "network": true,
+    "execution": true
+  },
+  "triggers": {
+    "onFileChange": true,
+    "onCommit": false,
+    "manual": true
+  }
+}
