@@ -6,11 +6,11 @@ paths:
   # YAML files
   - "**/*.yml"
   - "**/*.yaml"
-  
+
   # Shell scripts
   - "**/*.sh"
   - "**/*.bash"
-  
+
   # Markdown
   - "**/*.md"
 

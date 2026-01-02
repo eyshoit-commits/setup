@@ -34,22 +34,22 @@ jobs:
       security-events: write
       actions: read
       contents: read
-    
+
     strategy:
       fail-fast: false
       matrix:
         language: ['yaml', 'shell']
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
           config-file: ./.github/codeql-config.yml
-      
+
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
@@ -58,19 +58,19 @@ jobs:
   markdown-analysis:
     name: Markdown Lint & Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       - name: Install markdown tools
         run: npm install -g markdownlint-cli markdown-link-check
-      
+
       - name: Run markdownlint
         run: |
           markdownlint \
@@ -79,7 +79,7 @@ jobs:
             --ignore node_modules \
             --ignore artifacts
         continue-on-error: true
-      
+
       - name: Check markdown links
         run: |
           find . -name '*.md' \
@@ -92,11 +92,11 @@ jobs:
   shell-script-check:
     name: ShellCheck Analysis
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
         with:
@@ -104,7 +104,7 @@ jobs:
           severity: warning
           format: gcc
         continue-on-error: true
-      
+
       - name: Check workflow shell scripts
         run: |
           find .github/workflows -name '*.yml' -o -name '*.yaml' | xargs grep -l 'run:' | while read f; do

@@ -17,10 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'pull_request') ||
-      (github.event_name == 'issue_comment' && 
+      (github.event_name == 'issue_comment' &&
        github.event.issue.pull_request &&
        contains(github.event.comment.body, '/fix'))
-    
+
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
@@ -61,21 +61,21 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          
+
           if git diff --quiet; then
             echo "✅ No formatting changes needed"
             exit 0
           fi
-          
+
           git add .
           git commit -m "🤖 Auto-fix: Format code with Black/Ruff
 
           - Auto-formatted with Black/Ruff
           - Fixed linting issues
           - Normalized line endings
-          
+
           Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
-          
+
           git push
 
       - name: Comment on PR

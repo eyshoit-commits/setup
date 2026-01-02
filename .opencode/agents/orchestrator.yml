@@ -25,7 +25,7 @@ context:
     - ".mcp/context.json"
     - "setup-report.json"
     - "config/versions.env"
-  
+
 tooling:
   - git
   - bash

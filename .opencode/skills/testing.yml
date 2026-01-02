@@ -8,20 +8,20 @@ test_types:
       - pytest
       - jest
       - cargo-test
-  
+
   integration:
     description: "Test component interactions"
     tools:
       - pytest
       - jest
       - testcontainers
-  
+
   e2e:
     description: "Test complete user workflows"
     tools:
       - playwright
       - cypress
-  
+
   smoke:
     description: "Quick validation of critical functionality"
     script: "scripts/smoke-test.sh"
@@ -53,7 +53,7 @@ reporting:
     - html
     - json
     - lcov
-  
+
 automation:
   pre_commit: true
   ci_cd: true

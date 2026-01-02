@@ -11,7 +11,7 @@ jobs:
   validate:
     name: Validate Repository Structure
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,7 +27,7 @@ jobs:
             "scripts/setup-marketplace-apps.sh"
             "docs/SETUP_GUIDE.md"
           )
-          
+
           MISSING=0
           for file in "${REQUIRED_FILES[@]}"; do
             if [ ! -f "$file" ]; then
@@ -37,12 +37,12 @@ jobs:
               echo "✅ Found: $file"
             fi
           done
-          
+
           if [ $MISSING -eq 1 ]; then
             echo "❌ Some required files are missing"
             exit 1
           fi
-          
+
           echo "✅ All required files present"
 
       - name: Validate directory structure
@@ -56,7 +56,7 @@ jobs:
             "mcp"
             "docs"
           )
-          
+
           for dir in "${REQUIRED_DIRS[@]}"; do
             if [ ! -d "$dir" ]; then
               echo "⚠️ Missing directory: $dir"
@@ -70,7 +70,7 @@ jobs:
         run: |
           echo "🔍 Checking secrets configuration..."
           echo "Note: Actual secret values are not exposed in logs"
-          
+
           # Check if secrets template exists
           if [ -f ".github/secrets-template.env" ]; then
             echo "✅ Secrets template found"

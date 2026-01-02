@@ -160,15 +160,15 @@ chmod +x scripts/local-setup.sh
 # ==================================
 # 🚀 Local Development Setup
 # ==================================
-# 
+#
 # Repository root: /path/to/setup
-# 
+#
 # 📌 Installing Git hooks...
 # ✅ Installed pre-commit hook
 # ✅ Installed commit-msg hook
-# 
+#
 # ... weitere Schritte ...
-# 
+#
 # ✅ Local setup complete!
 ```
 
@@ -301,7 +301,7 @@ chmod +x scripts/setup-marketplace-apps.sh
 
 # Das Skript führt Sie durch die Installation von:
 # 1. CodeRabbit AI
-# 2. CodiumAI PR Agent  
+# 2. CodiumAI PR Agent
 # 3. CodeFactor
 # 4. Codacy
 # 5. Codecov
@@ -1246,15 +1246,15 @@ chmod +x scripts/local-setup.sh
 # ==================================
 # 🚀 Local Development Setup
 # ==================================
-# 
+#
 # Repository root: /path/to/setup
-# 
+#
 # 📌 Installing Git hooks...
 # ✅ Installed pre-commit hook
 # ✅ Installed commit-msg hook
-# 
+#
 # ... more steps ...
-# 
+#
 # ✅ Local setup complete!
 ```
 
@@ -1387,7 +1387,7 @@ chmod +x scripts/setup-marketplace-apps.sh
 
 # Script guides you through installing:
 # 1. CodeRabbit AI
-# 2. CodiumAI PR Agent  
+# 2. CodiumAI PR Agent
 # 3. CodeFactor
 # 4. Codacy
 # 5. Codecov
@@ -2187,6 +2187,6 @@ git commit -m "fix: resolve merge conflicts"
 
 ---
 
-**Last Updated:** 2026-01-02  
-**Version:** 1.0.0  
+**Last Updated:** 2026-01-02
+**Version:** 1.0.0
 **Maintained By:** Enterprise Setup Team

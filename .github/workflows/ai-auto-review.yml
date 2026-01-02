@@ -17,10 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'pull_request') ||
-      (github.event_name == 'issue_comment' && 
+      (github.event_name == 'issue_comment' &&
        github.event.issue.pull_request &&
        contains(github.event.comment.body, '/review'))
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,45 +40,45 @@ jobs:
           script: |
             const fs = require('fs');
             const diff = fs.readFileSync('pr-diff.txt', 'utf8');
-            
+
             // Erstelle Review-Kommentar mit AI-Vorschlägen
             const reviewComment = `## 🤖 AI Code Review
-            
+
             ### Automatische Analyse
-            
+
             **Geprüfte Änderungen:** ${{ steps.diff.outputs.diff_size }} Zeilen
-            
+
             ### Empfohlene Verbesserungen
-            
+
             #### 🔒 Sicherheit
             - [ ] Keine Secrets/API-Keys im Code
             - [ ] Input-Validierung vorhanden
             - [ ] Sichere Dependencies verwendet
-            
+
             #### ✨ Code-Qualität
             - [ ] Code folgt Style-Guide
             - [ ] Keine TODO/FIXME für Production
             - [ ] Error-Handling implementiert
-            
+
             #### 📝 Dokumentation
             - [ ] README aktualisiert (falls nötig)
             - [ ] Kommentare für komplexe Logik
             - [ ] CHANGELOG.md erweitert
-            
+
             #### 🧪 Tests
             - [ ] Unit-Tests hinzugefügt
             - [ ] Smoke-Tests erfolgreich
-            
+
             ---
-            
+
             💡 **Tipp:** Schreibe \`/fix\` um automatische Korrekturen anzuwenden.
-            
+
             📚 **Weitere AI-Tools:**
             - [CodeRabbit](https://github.com/apps/coderabbitai) - Detaillierte Code-Reviews
             - [CodiumAI](https://github.com/apps/codiumai-pr-agent) - Test-Generierung
             - [Copilot](https://github.com/features/copilot) - Code-Vorschläge
             `;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -89,7 +89,7 @@ jobs:
   security-check:
     name: Security & Secrets Scan
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -109,7 +109,7 @@ jobs:
     name: AI Code Suggestions
     runs-on: ubuntu-latest
     needs: [copilot-review]
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -146,18 +146,18 @@ jobs:
                 reason: "Behebe automatisch fixbare Linting-Fehler"
               }
             ];
-            
+
             let comment = "## 💡 AI-Generierte Verbesserungsvorschläge\n\n";
-            
+
             suggestions.forEach(s => {
               comment += `### ${s.title}\n`;
               comment += `**Grund:** ${s.reason}\n`;
               comment += `\`\`\`bash\n${s.suggestion}\n\`\`\`\n\n`;
             });
-            
+
             comment += "---\n";
             comment += "✅ **Auto-Apply:** Diese Vorschläge können automatisch angewendet werden mit `/fix`\n";
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -168,7 +168,7 @@ jobs:
   setup-validation:
     name: Validate Setup Scripts
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

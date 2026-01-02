@@ -74,9 +74,9 @@ function Check-Drift {
         [string]$Expected,
         [string]$Actual
     )
-    
+
     $script:Checks++
-    
+
     if ($Expected -ne $Actual) {
         if ($env:SETUP_MODE -eq "repro") {
             Write-ColorOutput Red "❌ DRIFT: $Tool expected $Expected, got $Actual (REPRO mode - FAILING)"
@@ -137,7 +137,7 @@ Write-ColorOutput Cyan "Checking provenance..."
 $ProvenanceFile = Join-Path $RepoRoot "provenance.json"
 if (Test-Path $ProvenanceFile) {
     Write-ColorOutput Green "✅ provenance.json exists"
-    
+
     $Prov = Get-Content $ProvenanceFile | ConvertFrom-Json
     Write-Output "   Setup ID: $($Prov.setup_id)"
     Write-Output "   Timestamp: $($Prov.timestamp)"
@@ -151,7 +151,7 @@ Write-ColorOutput Cyan "Checking agent handshake..."
 $HandshakeFile = Join-Path $RepoRoot "agent-handshake.json"
 if (Test-Path $HandshakeFile) {
     Write-ColorOutput Green "✅ agent-handshake.json exists"
-    
+
     $Handshake = Get-Content $HandshakeFile | ConvertFrom-Json
     Write-Output "   Status: $($Handshake.setup_status)"
     Write-Output "   Protocol: $($Handshake.protocol_version)"
@@ -167,7 +167,7 @@ if ($Drifts -eq 0) {
     exit 0
 } else {
     Write-ColorOutput Yellow "⚠️  $Drifts drift(s) detected out of $Checks checks"
-    
+
     if ($env:SETUP_MODE -eq "repro") {
         Write-ColorOutput Red "❌ REPRO mode - exiting with error"
         exit 1

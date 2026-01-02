@@ -25,11 +25,11 @@ jobs:
             node: "false"
             python: "true"
             rust: "false"
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Run setup (${{ matrix.profile.name }})
         env:
           FEATURE_NODE: ${{ matrix.profile.node }}
@@ -39,32 +39,32 @@ jobs:
         run: |
           ./scripts/setup.sh || true
           echo "Setup completed (non-blocking for now)"
-      
+
       - name: Check generated files
         run: |
           echo "Checking for generated files..."
-          
+
           if [ -f "provenance.json" ]; then
             echo "✅ provenance.json exists"
             cat provenance.json
           else
             echo "⚠️  provenance.json not found"
           fi
-          
+
           if [ -f "agent-handshake.json" ]; then
             echo "✅ agent-handshake.json exists"
             cat agent-handshake.json
           else
             echo "⚠️  agent-handshake.json not found"
           fi
-          
+
           if [ -f "setup-report.json" ]; then
             echo "✅ setup-report.json exists"
             cat setup-report.json
           else
             echo "⚠️  setup-report.json not found"
           fi
-      
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         if: always()
@@ -75,15 +75,15 @@ jobs:
             agent-handshake.json
             setup-report.json
           retention-days: 7
-  
+
   test-powershell-scripts:
     name: Test PowerShell Scripts (Windows)
     runs-on: windows-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Run setup
         env:
           FEATURE_NODE: "false"
@@ -94,26 +94,26 @@ jobs:
         run: |
           .\scripts\setup.ps1
           echo "Setup completed"
-      
+
       - name: Check generated files
         shell: pwsh
         run: |
           echo "Checking for generated files..."
-          
+
           if (Test-Path "provenance.json") {
             echo "✅ provenance.json exists"
             Get-Content provenance.json
           } else {
             echo "⚠️  provenance.json not found"
           }
-          
+
           if (Test-Path "agent-handshake.json") {
             echo "✅ agent-handshake.json exists"
             Get-Content agent-handshake.json
           } else {
             echo "⚠️  agent-handshake.json not found"
           }
-      
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         if: always()
@@ -124,24 +124,24 @@ jobs:
             agent-handshake.json
             setup-report.json
           retention-days: 7
-  
+
   validate-scripts:
     name: Validate Script Syntax
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Install shellcheck
         run: sudo apt-get install -y shellcheck
-      
+
       - name: Check Bash scripts
         run: |
           echo "Checking bash scripts with shellcheck..."
           shellcheck scripts/*.sh || true
           echo "Shellcheck completed"
-      
+
       - name: Validate JSON configs
         run: |
           echo "Validating JSON structure..."

@@ -56,12 +56,12 @@ if [ -f "$REPO_ROOT/setup-report.json" ] && command -v jq &>/dev/null; then
   PYTHON_STATUS="passed"
   RUST_STATUS="passed"
   PNPM_STATUS="passed"
-  
+
   node --version &>/dev/null || NODE_STATUS="failed"
   (command -v uvx &>/dev/null && uvx ruff --version &>/dev/null) || PYTHON_STATUS="failed"
   cargo --version &>/dev/null || RUST_STATUS="failed"
   pnpm store path &>/dev/null || PNPM_STATUS="failed"
-  
+
   jq --arg node "$NODE_STATUS" \
      --arg python "$PYTHON_STATUS" \
      --arg rust "$RUST_STATUS" \
