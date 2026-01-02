@@ -1,0 +1,48 @@
+name: "code-analysis"
+description: "Comprehensive code analysis and quality checking"
+
+capabilities:
+  - static-analysis
+  - linting
+  - type-checking
+  - complexity-analysis
+
+tools:
+  python:
+    - ruff
+    - mypy
+    - pylint
+  javascript:
+    - eslint
+    - prettier
+    - tsc
+  rust:
+    - clippy
+    - rustfmt
+
+checks:
+  - syntax-errors
+  - type-errors
+  - style-violations
+  - security-issues
+  - code-smells
+
+metrics:
+  - cyclomatic-complexity
+  - code-duplication
+  - maintainability-index
+
+output:
+  - console
+  - json-report
+  - annotations
+
+integration:
+  - pre-commit
+  - ci-cd
+  - ide
+
+configuration:
+  python: "pyproject.toml"
+  javascript: ".eslintrc.json"
+  rust: "clippy.toml"
