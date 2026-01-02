@@ -29,11 +29,6 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -41,15 +36,7 @@ jobs:
 
       - name: Install formatters and linters
         run: |
-          npm install -g prettier eslint
-          pip install ruff black isort
-
-      - name: Auto-format JavaScript/TypeScript
-        run: |
-          if ls *.js *.ts 2>/dev/null || find . -name "*.js" -o -name "*.ts" 2>/dev/null | grep -q .; then
-            prettier --write "**/*.{js,ts,json,yml,yaml,md}" || true
-            eslint --fix "**/*.{js,ts}" || true
-          fi
+          pip install ruff black isort autopep8
 
       - name: Auto-format Python
         run: |
@@ -81,10 +68,10 @@ jobs:
           fi
           
           git add .
-          git commit -m "🤖 Auto-fix: Format code and apply linters
+          git commit -m "🤖 Auto-fix: Format code with Black/Ruff
 
-          - Auto-formatted with Prettier/Black
-          - Fixed linting issues with ESLint/Ruff
+          - Auto-formatted with Black/Ruff
+          - Fixed linting issues
           - Normalized line endings
           
           Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
