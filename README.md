@@ -59,6 +59,7 @@ Dieses Repository bietet ein vollständiges Enterprise-Setup mit integrierten Gi
 - **CodiumAI PR Agent** - Automated test generation and code analysis
 
 ### 🔄 Workflow Automation
+- **Mergify** - Automated merge queue for PRs meeting quality gates
 - **Setup Validation** - Repository structure and configuration checks
 - **Commit Validation** - Conventional Commits enforcement
 - **Drift Detection** - Infrastructure configuration monitoring
@@ -109,6 +110,7 @@ For Windows (PowerShell):
 
 - **[Setup Guide](docs/SETUP_GUIDE.md)** - Complete setup instructions (DE/EN)
 - **[Marketplace Apps](docs/RECOMMENDED_MARKETPLACE_APPS.md)** - App integration guide (DE/EN)
+- **[Mergify Configuration](docs/MERGIFY.md)** - Automated merge queue documentation (DE/EN)
 - **[Architecture](docs/ARCHITECTURE.md)** - System architecture documentation (DE/EN)
 
 ---
@@ -207,6 +209,7 @@ setup/
 - [Codecov](https://codecov.io/) - Coverage tracking
 - [Snyk](https://snyk.io/) - Security scanning
 - [CodeFactor](https://www.codefactor.io/) - Code analysis
+- [Mergify](https://mergify.com/) - Automated merge queue
 
 ### MCP Servers
 - Filesystem Server - File operations
