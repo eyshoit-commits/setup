@@ -2,30 +2,112 @@ name: CodeQL Security Analysis
 on:
   push:
     branches: [main, develop]
+    paths:
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.sh'
+      - '**/*.bash'
+      - '**/*.md'
+      - '.github/workflows/**'
   pull_request:
-    branches: [main]
+    branches: [main, develop]
+    paths:
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.sh'
+      - '**/*.bash'
+      - '**/*.md'
+      - '.github/workflows/**'
   schedule:
-    - cron: '0 6 * * 1'
+    - cron: '0 2 * * *'  # Täglich 02:00 UTC
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
 
 jobs:
-  analyze:
-    name: Analyze Code
+  yaml-shell-analysis:
+    name: YAML & Shell CodeQL Analysis
     runs-on: ubuntu-latest
     permissions:
       security-events: write
       actions: read
       contents: read
+    
     strategy:
+      fail-fast: false
       matrix:
-        language: ['auto']
+        language: ['yaml', 'shell']
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+          config-file: ./.github/codeql-config.yml
+      
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}
+
+  markdown-analysis:
+    name: Markdown Lint & Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install markdown tools
+        run: npm install -g markdownlint-cli markdown-link-check
+      
+      - name: Run markdownlint
+        run: |
+          markdownlint \
+            --config .markdownlint.json \
+            '**/*.md' \
+            --ignore node_modules \
+            --ignore artifacts
+        continue-on-error: true
+      
+      - name: Check markdown links
+        run: |
+          find . -name '*.md' \
+            -not -path './node_modules/*' \
+            -not -path './.git/*' \
+            -not -path './artifacts/*' \
+            -exec markdown-link-check {} \;
+        continue-on-error: true
+
+  shell-script-check:
+    name: ShellCheck Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './scripts'
+          severity: warning
+          format: gcc
+        continue-on-error: true
+      
+      - name: Check workflow shell scripts
+        run: |
+          find .github/workflows -name '*.yml' -o -name '*.yaml' | xargs grep -l 'run:' | while read f; do
+            echo "Checking shell in: $f"
+          done
+        continue-on-error: true

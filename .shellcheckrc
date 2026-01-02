@@ -1,0 +1,23 @@
+# ShellCheck Configuration
+# https://www.shellcheck.net/
+
+# Enable all optional checks
+enable=all
+
+# Disable specific checks if needed (leave empty to enable all)
+disable=
+
+# Exclude patterns
+exclude_patterns=
+  ^./node_modules
+  ^./.git
+  ^./artifacts
+
+# Shell dialect (bash, sh, ksh, etc.)
+shell=bash
+
+# Sourced files
+source_dir=./scripts
+
+# Severity levels: error, warning, info, style
+severity=warning
