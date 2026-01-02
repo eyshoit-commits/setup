@@ -1,0 +1,10 @@
+[workspace]
+members = []
+
+[package]
+name = "setup-tools"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Add any Rust tools needed for the setup

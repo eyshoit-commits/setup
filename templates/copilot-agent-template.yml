@@ -1,0 +1,19 @@
+name: ""
+description: ""
+
+triggers:
+  - pull_request:
+      types: [opened, synchronize]
+
+agent:
+  model: gpt-4
+  temperature: 0.2
+  
+  instructions: |
+    You are a specialized agent. 
+
+  tools: []
+
+  permissions:
+    pull_requests: write
+    contents: read

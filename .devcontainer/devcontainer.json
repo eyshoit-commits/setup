@@ -13,7 +13,9 @@
       "version": "latest"
     },
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/git:1": {}
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/conda:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
 
   "customizations": {
@@ -30,12 +32,22 @@
         "GitHub.copilot-chat",
         "redhat.vscode-yaml",
         "eamodio.gitlens",
-        "codecov.codecov"
+        "codecov.codecov",
+        "ms-vscode.vscode-typescript-next",
+        "github.vscode-github-actions",
+        "ms-azuretools.vscode-docker",
+        "GitHub.vscode-pull-request-github",
+        "ms-vscode-remote.remote-containers",
+        "ms-vscode.remote-repositories",
+        "supabase.supabase-extension",
+        "ms-ossdata.vscode-postgresql"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
+        "python.defaultInterpreterPath": "/opt/conda/bin/python",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
+          "source.fixAll": "explicit",
           "source.fixAll.eslint": "explicit",
           "source.organizeImports": "explicit"
         },
@@ -57,7 +69,7 @@
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "postStartCommand": "bash .devcontainer/post-start.sh",
 
-  "forwardPorts": [3000, 8000, 8080],
+  "forwardPorts": [3000, 8000, 8080, 5000, 5432],
 
   "remoteUser": "codespace"
 }
