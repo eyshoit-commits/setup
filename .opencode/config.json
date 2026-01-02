@@ -1,0 +1,40 @@
+{
+  "version": "1.0.0",
+  "skills": [
+    "@malhashemi/opencode-skills",
+    "@malhashemi/opencode-sessions",
+    "@shuv1337/oc-manager",
+    "@code-yeongyu/oh-my-opencode",
+    "@IgorWarzocha/Opencode-Roadmap",
+    "@zenobi-us/opencode-background",
+    "@Tarquinen/opencode-smart-title",
+    "@pantheon-org/opencode-warcraft-notifications",
+    "@IgorWarzocha/Opencode-Context-Analysis-Plugin",
+    "@shuv1337/oc-web",
+    "@ajaxdude/opencode-ai-poimandres-theme",
+    "@VoltAgent/awesome-claude-code-subagents",
+    "@darrenhinde/OpenAgents"
+  ],
+  "agents": {
+    "setup-agent": {
+      "description": "Automated repository setup and initialization",
+      "skills": ["@shuv1337/oc-manager", "@code-yeongyu/oh-my-opencode"]
+    },
+    "security-agent": {
+      "description": "Security scanning and compliance checks",
+      "skills": ["@IgorWarzocha/Opencode-Context-Analysis-Plugin"]
+    },
+    "roadmap-agent": {
+      "description": "Project roadmap management and tracking",
+      "skills": ["@IgorWarzocha/Opencode-Roadmap"]
+    },
+    "dev-agent": {
+      "description": "Development workflow automation",
+      "skills": ["@VoltAgent/awesome-claude-code-subagents", "@darrenhinde/OpenAgents"]
+    }
+  },
+  "sessions": {
+    "enabled": true,
+    "provider": "@malhashemi/opencode-sessions"
+  }
+}

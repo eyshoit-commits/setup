@@ -1,0 +1,26 @@
+{
+  "name": "setup",
+  "version": "1.0.0",
+  "description": "Enterprise Repository Setup",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "lint": "echo \"No linting configured yet\"",
+    "build": "echo \"No build configured yet\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eyshoit-commits/setup.git"
+  },
+  "keywords": [
+    "setup",
+    "enterprise",
+    "opencode"
+  ],
+  "author": "eyshoit-commits",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eyshoit-commits/setup/issues"
+  },
+  "homepage": "https://github.com/eyshoit-commits/setup#readme"
+}

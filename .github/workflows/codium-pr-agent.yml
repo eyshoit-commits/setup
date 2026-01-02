@@ -1,0 +1,14 @@
+name: CodiumAI PR Agent
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  codium:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: CodiumAI PR Agent
+        uses: codiumai/pr-agent@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
