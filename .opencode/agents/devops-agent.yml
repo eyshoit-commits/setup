@@ -1,0 +1,62 @@
+name: "devops-agent"
+role: "devops-engineer"
+description: "Specialized agent for DevOps and infrastructure tasks"
+
+capabilities:
+  - ci-cd
+  - containerization
+  - infrastructure-as-code
+  - monitoring
+
+responsibilities:
+  - "Manage CI/CD pipelines"
+  - "Configure development environments"
+  - "Setup monitoring and logging"
+  - "Maintain infrastructure code"
+
+skills:
+  - code-analysis
+  - documentation
+
+tools:
+  - docker
+  - github-actions
+  - bash
+  - powershell
+
+platforms:
+  - github
+  - codespaces
+  - devcontainers
+
+infrastructure:
+  - docker
+  - kubernetes
+  - terraform
+
+ci_cd:
+  - github-actions
+  - gitlab-ci
+
+monitoring:
+  - prometheus
+  - grafana
+  - loki
+
+security:
+  - gitleaks
+  - pre-commit
+  - secret-scanning
+
+automation:
+  scripts:
+    - "scripts/setup.sh"
+    - "scripts/setup.ps1"
+    - "scripts/validate.sh"
+    - "scripts/smoke-test.sh"
+
+context_awareness:
+  - ".mcp/context.json"
+  - ".github/workflows/"
+  - ".devcontainer/devcontainer.json"
+  - "config/versions.env"

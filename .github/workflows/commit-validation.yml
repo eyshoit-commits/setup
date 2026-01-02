@@ -1,0 +1,105 @@
+name: Commit Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  conventional-commits:
+    name: Validate Conventional Commits
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install commitlint
+        run: |
+          npm install -g @commitlint/cli @commitlint/config-conventional
+
+      - name: Validate commit messages
+        run: |
+          echo "🔍 Validating commit messages..."
+          
+          # Get commits in this PR
+          git log --format=%H origin/${{ github.base_ref }}..HEAD | while read commit; do
+            message=$(git log --format=%B -n 1 $commit | head -n 1)
+            echo "Checking: $message"
+            
+            # Basic conventional commits pattern
+            if echo "$message" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+"; then
+              echo "✅ Valid: $message"
+            else
+              echo "⚠️ Invalid format: $message"
+              echo "Expected format: type(scope): description"
+              echo "Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+            fi
+          done
+
+  pr-validation:
+    name: PR Title & Description Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Validate PR title
+        run: |
+          echo "🔍 Validating PR title..."
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          
+          if echo "$PR_TITLE" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+"; then
+            echo "✅ Valid PR title: $PR_TITLE"
+          else
+            echo "⚠️ PR title should follow conventional commits format"
+            echo "Current: $PR_TITLE"
+            echo "Expected: type(scope): description"
+            exit 1
+          fi
+
+      - name: Validate PR description
+        run: |
+          echo "🔍 Validating PR description..."
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          if [ -z "$PR_BODY" ]; then
+            echo "⚠️ PR description is empty"
+            echo "Please provide a description of your changes"
+            exit 1
+          else
+            echo "✅ PR has description"
+          fi
+
+      - name: Check for issue references
+        run: |
+          echo "🔍 Checking for issue references..."
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          if echo "$PR_BODY" | grep -qE "(closes|fixes|resolves) #[0-9]+"; then
+            echo "✅ PR references an issue"
+          else
+            echo "ℹ️ No issue reference found (optional)"
+          fi
+
+  commit-summary:
+    name: Commit Validation Summary
+    runs-on: ubuntu-latest
+    needs: [conventional-commits, pr-validation]
+    if: always()
+    
+    steps:
+      - name: Summary
+        run: |
+          echo "📊 Commit Validation Summary"
+          echo "========================="
+          echo "Conventional commits: Checked"
+          echo "PR title: Validated"
+          echo "PR description: Validated"
+          echo "Status: See job details above"

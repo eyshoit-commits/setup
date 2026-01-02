@@ -1,0 +1,126 @@
+# Generated files (can be regenerated)
+provenance.json
+agent-handshake.json
+setup-report.json
+README-badges.md
+
+# Auto-generated environment configuration
+env.d/10-tools.env
+
+# Environment files (keep .env.example)
+.env
+
+# Temporary files
+*.tmp
+*.log
+/tmp/
+
+# Artifacts (only commit intentionally)
+/artifacts/*.sh
+/artifacts/*.exe
+
+# IDE and OS files
+# Environment variables
+*.env
+.env.local
+.env.*.local
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+venv/
+.venv/
+
+# Rust
+target/
+Cargo.lock
+
+# MCP context
+.mcp/
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+.cache/
+coverage/
+.nyc_output/
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+# OS
+Thumbs.db
+.DS_Store
+
+# Secrets and credentials
+*.pem
+*.key
+*.crt
+secrets.json
+credentials.json
+
+# Local configuration
+.local/
+local-config.json
+
+# MCP local config
+mcp/local-config.json
+
+# Git hooks (managed separately)
+# .git/hooks are installed from .github/hooks
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+
+# Backup files
+*.bak
+*.backup

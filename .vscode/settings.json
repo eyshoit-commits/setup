@@ -1,0 +1,18 @@
+{
+  "opencode.enabled": true,
+  "opencode.configPath": ".opencode/config.json",
+  "opencode.agents": {
+    "setup-agent": true,
+    "security-agent": true,
+    "roadmap-agent": true,
+    "dev-agent": true
+  },
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.validate": ["javascript", "typescript"],
+  "files.associations": {
+    "*.opencode.json": "json"
+  }
+}
