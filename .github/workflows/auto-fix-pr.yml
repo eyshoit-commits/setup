@@ -1,0 +1,104 @@
+name: Auto-Fix PR Issues
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  auto-fix:
+    name: Automatic Code Fixes
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'pull_request') ||
+      (github.event_name == 'issue_comment' && 
+       github.event.issue.pull_request &&
+       contains(github.event.comment.body, '/fix'))
+    
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install formatters and linters
+        run: |
+          npm install -g prettier eslint
+          pip install ruff black isort
+
+      - name: Auto-format JavaScript/TypeScript
+        run: |
+          if ls *.js *.ts 2>/dev/null || find . -name "*.js" -o -name "*.ts" 2>/dev/null | grep -q .; then
+            prettier --write "**/*.{js,ts,json,yml,yaml,md}" || true
+            eslint --fix "**/*.{js,ts}" || true
+          fi
+
+      - name: Auto-format Python
+        run: |
+          if ls *.py 2>/dev/null || find . -name "*.py" 2>/dev/null | grep -q .; then
+            ruff check --fix . || true
+            black . || true
+            isort . || true
+          fi
+
+      - name: Auto-format Shell Scripts
+        run: |
+          if command -v shfmt &>/dev/null; then
+            find . -name "*.sh" -exec shfmt -w {} \; || true
+          fi
+
+      - name: Fix line endings
+        run: |
+          find . -type f \( -name "*.sh" -o -name "*.py" -o -name "*.js" \) \
+            -exec sed -i 's/\r$//' {} \; || true
+
+      - name: Commit and push fixes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          if git diff --quiet; then
+            echo "✅ No formatting changes needed"
+            exit 0
+          fi
+          
+          git add .
+          git commit -m "🤖 Auto-fix: Format code and apply linters
+
+          - Auto-formatted with Prettier/Black
+          - Fixed linting issues with ESLint/Ruff
+          - Normalized line endings
+          
+          Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          
+          git push
+
+      - name: Comment on PR
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ **Auto-Fix Applied**\n\nAutomatische Code-Formatierung wurde durchgeführt:\n- Prettier/Black Formatierung\n- ESLint/Ruff Linting\n- Line-Ending Normalisierung\n\nBitte prüfen Sie die Änderungen.'
+            })

@@ -5,26 +5,38 @@
 ## Status
 
 ### Security
+
 ![CodeQL](https://github.com/eyshoit-commits/setup/actions/workflows/security-scan.yml/badge.svg)
 ![Snyk](https://img.shields.io/badge/Snyk-Monitored-4C4A73?logo=snyk)
 ![Secret Detection](https://img.shields.io/badge/Secret%20Detection-Active-success)
 
 ### Code Quality
+
 ![Codacy](https://img.shields.io/badge/Codacy-A-brightgreen?logo=codacy)
 ![Codecov](https://img.shields.io/badge/Codecov-Active-F01F7A?logo=codecov)
 ![CodeFactor](https://img.shields.io/badge/CodeFactor-A+-brightgreen?logo=codefactor)
 ![ShellCheck](https://github.com/eyshoit-commits/setup/actions/workflows/code-quality.yml/badge.svg)
 
 ### AI Review
+
 ![CodeRabbit](https://img.shields.io/badge/CodeRabbit-Active-blue?logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnoiIGZpbGw9IndoaXRlIi8+PC9zdmc+)
 ![CodiumAI](https://img.shields.io/badge/CodiumAI-Active-blue?logo=ai)
 
+### Automation
+
+![Auto-Fix](https://github.com/eyshoit-commits/setup/actions/workflows/auto-fix-pr.yml/badge.svg)
+![AI Auto-Review](https://github.com/eyshoit-commits/setup/actions/workflows/ai-auto-review.yml/badge.svg)
+![Dependency Updates](https://github.com/eyshoit-commits/setup/actions/workflows/auto-dependency-updates.yml/badge.svg)
+![Dependabot](https://img.shields.io/badge/Dependabot-Active-025E8C?logo=dependabot)
+
 ### Infrastructure
+
 ![MCP Health](https://github.com/eyshoit-commits/setup/actions/workflows/mcp-health-check.yml/badge.svg)
 ![Drift Check](https://github.com/eyshoit-commits/setup/actions/workflows/drift-check.yml/badge.svg)
 ![Setup Validation](https://github.com/eyshoit-commits/setup/actions/workflows/setup-validation.yml/badge.svg)
 
 ### Development
+
 ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
@@ -33,38 +45,58 @@
 ## 📚 Overview / Übersicht
 
 **English:**  
-This repository provides a complete enterprise setup with integrated GitHub Marketplace apps, automated workflows, OpenCode agents, and MCP (Model Context Protocol) server integration. It includes comprehensive security scanning, code quality checks, AI-powered code reviews, and automated testing.
+This repository provides a complete enterprise setup with integrated GitHub Marketplace apps, automated workflows, OpenCode agents, and MCP (Model Context Protocol) server integration. It includes comprehensive security scanning, code quality checks, AI-powered code reviews, automated testing, and **fully automated PR fixes and reviews**.
 
 **Deutsch:**  
-Dieses Repository bietet ein vollständiges Enterprise-Setup mit integrierten GitHub Marketplace Apps, automatisierten Workflows, OpenCode Agents und MCP (Model Context Protocol) Server-Integration. Es umfasst umfassende Sicherheitsscans, Code-Qualitätsprüfungen, KI-gestützte Code-Reviews und automatisierte Tests.
+Dieses Repository bietet ein vollständiges Enterprise-Setup mit integrierten GitHub Marketplace Apps, automatisierten Workflows, OpenCode Agents und MCP (Model Context Protocol) Server-Integration. Es umfasst umfassende Sicherheitsscans, Code-Qualitätsprüfungen, KI-gestützte Code-Reviews, automatisierte Tests und **vollautomatische PR-Fixes und Reviews**.
+
+---
+
+## 🤖 Automatisierung / Automation
+
+**🎯 Vollständig automatisiert! Alle PRs werden automatisch geprüft, formatiert und optimiert.**
+
+- ✅ **Auto-Fix bei jedem PR** - Prettier, ESLint, Black, Ruff laufen automatisch
+- 🔍 **AI Code Review** - CodeRabbit & CodiumAI kommentieren Verbesserungen
+- 📦 **Dependency Updates** - Wöchentliche automatische Updates (Dependabot)
+- 🔒 **Security Scanning** - Gitleaks & Dependency-Review bei jedem PR
+
+**Trigger:** Einfach `/fix` oder `/review` in PR-Kommentare schreiben!
+
+📖 **Vollständige Dokumentation:** [docs/AUTOMATION.md](docs/AUTOMATION.md)
 
 ---
 
 ## ✨ Features
 
 ### 🔐 Security & Compliance
+
 - **CodeQL Analysis** - Advanced security vulnerability detection
 - **Snyk Security Scanning** - Dependency vulnerability monitoring
 - **Secret Detection** - Prevent credential leaks with TruffleHog & Gitleaks
 - **Dependency Review** - Automated dependency security checks
 
 ### 📊 Code Quality
+
 - **Codacy Integration** - Automated code quality analysis
 - **Codecov** - Test coverage tracking and reporting
 - **CodeFactor** - Code quality scoring
 - **ESLint & ShellCheck** - Linting and formatting enforcement
 
 ### 🤖 AI-Powered Reviews
+
 - **CodeRabbit AI** - Intelligent PR reviews with contextual suggestions
 - **CodiumAI PR Agent** - Automated test generation and code analysis
 
 ### 🔄 Workflow Automation
+
 - **Setup Validation** - Repository structure and configuration checks
 - **Commit Validation** - Conventional Commits enforcement
 - **Drift Detection** - Infrastructure configuration monitoring
 - **MCP Health Checks** - Server connectivity and status monitoring
 
 ### 🛠️ Development Tools
+
 - **OpenCode Agents** - Bash & PowerShell automation agents
 - **MCP Servers** - Filesystem, GitHub, Git, and search integration
 - **Git Hooks** - Pre-commit and commit-msg validation
@@ -75,6 +107,7 @@ Dieses Repository bietet ein vollständiges Enterprise-Setup mit integrierten Gi
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Git 2.30+
 - Node.js 20+
 - npm 10+
@@ -98,6 +131,7 @@ cd setup
 ```
 
 For Windows (PowerShell):
+
 ```powershell
 # Run PowerShell setup
 .\scripts\setup-marketplace-apps.ps1
@@ -116,20 +150,25 @@ For Windows (PowerShell):
 ## 🔧 Configuration
 
 ### Secrets Management
+
 Copy the secrets template and configure your tokens:
+
 ```bash
 cp .github/secrets-template.env .env
 # Edit .env and add your tokens
 ```
 
 Required secrets for full functionality:
+
 - `SNYK_TOKEN` - Snyk security scanning
 - `CODECOV_TOKEN` - Code coverage reporting
 - `CODACY_PROJECT_TOKEN` - Code quality analysis
 - `GITHUB_TOKEN` - GitHub API access
 
 ### Branch Protection
+
 Apply branch protection rules using the configuration:
+
 ```bash
 # Reference: .github/branch-protection.json
 # Apply via GitHub UI: Settings > Branches > Add rule
@@ -157,6 +196,7 @@ Apply branch protection rules using the configuration:
 We follow [Conventional Commits](https://www.conventionalcommits.org/) specification.
 
 Commit message format:
+
 ```
 type(scope): description
 
@@ -201,6 +241,7 @@ setup/
 ## 🔗 Integrated Services
 
 ### GitHub Marketplace Apps
+
 - [CodeRabbit](https://github.com/apps/coderabbitai) - AI code reviews
 - [CodiumAI](https://github.com/apps/codiumai-pr-agent) - AI PR agent
 - [Codacy](https://www.codacy.com/) - Code quality
@@ -209,6 +250,7 @@ setup/
 - [CodeFactor](https://www.codefactor.io/) - Code analysis
 
 ### MCP Servers
+
 - Filesystem Server - File operations
 - GitHub Server - GitHub API integration
 - Git Server - Git operations
@@ -233,6 +275,7 @@ MIT License - see LICENSE file for details
 ## 🙏 Acknowledgments
 
 Built with ❤️ using:
+
 - GitHub Actions
 - Model Context Protocol (MCP)
 - OpenCode Framework

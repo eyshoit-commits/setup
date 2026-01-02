@@ -1,0 +1,145 @@
+name: Automated Dependency Updates
+
+on:
+  schedule:
+    # Täglich um 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot-auto-merge:
+    name: Auto-merge Dependabot PRs
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Auto-approve minor/patch updates
+        if: |
+          steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        run: |
+          gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-merge
+        if: |
+          steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        run: |
+          gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  npm-updates:
+    name: NPM Dependency Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check for updates
+        id: check
+        run: |
+          if [ -f "package.json" ]; then
+            npm outdated --json > outdated.json || true
+            if [ -s outdated.json ]; then
+              echo "has_updates=true" >> $GITHUB_OUTPUT
+            else
+              echo "has_updates=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Create update PR
+        if: steps.check.outputs.has_updates == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "⬆️ chore: Update npm dependencies"
+          title: "⬆️ Automated NPM Dependency Updates"
+          body: |
+            ## 📦 Dependency Updates verfügbar
+            
+            Dieser PR wurde automatisch erstellt um NPM-Dependencies zu aktualisieren.
+            
+            ### 🔍 Änderungen prüfen
+            ```bash
+            npm outdated
+            ```
+            
+            ### ✅ Nach Merge
+            - [ ] Tests ausführen
+            - [ ] Smoke-Tests validieren
+            - [ ] CHANGELOG aktualisieren
+            
+            ---
+            🤖 Erstellt von GitHub Actions
+          branch: automated/npm-updates
+          delete-branch: true
+          labels: dependencies,automated
+
+  python-updates:
+    name: Python Dependency Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check for updates
+        id: check
+        run: |
+          if [ -f "config/requirements.txt" ]; then
+            pip install pip-check-updates
+            pcu -r config/requirements.txt || echo "has_updates=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update requirements
+        if: steps.check.outputs.has_updates == 'true'
+        run: |
+          pip install pip-tools
+          pip-compile --upgrade config/requirements.txt
+
+      - name: Create update PR
+        if: steps.check.outputs.has_updates == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "⬆️ chore: Update Python dependencies"
+          title: "⬆️ Automated Python Dependency Updates"
+          body: |
+            ## 🐍 Python Dependency Updates
+            
+            Automatische Aktualisierung der Python-Dependencies.
+            
+            ### Geänderte Datei
+            - `config/requirements.txt`
+            
+            ---
+            🤖 Erstellt von GitHub Actions
+          branch: automated/python-updates
+          delete-branch: true
+          labels: dependencies,automated,python
