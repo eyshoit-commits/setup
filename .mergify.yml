@@ -1,5 +1,36 @@
 queue_rules:
   - name: Merge
+    conditions:
+      # Target the protected main branch
+      - base=main
+      # Require at least one approving review (aligns with common branch protection)
+      - "#approved-reviews-by>=1"
+      # Require that all mandatory CI checks have succeeded.
+      # NOTE: These should correspond to the required status checks configured for main.
+      # Add one `check-success=` entry per required check.
+      - check-success=CI / validate
+      - check-success=CI / unit-tests
+      - check-success=CI / integration-tests
+    batch_size: 1
+    batch_max_wait_time: 0s
+    merge_method: squash
+    priority: high
+
+pull_request_rules:
+  - name: Add approved PRs with passing checks to Merge queue
+    conditions:
+      - base=main
+      # Only auto-queue PRs explicitly marked for automation
+      - label=automerge
+      - "#approved-reviews-by>=1"
+      # Ensure CI is green before enqueuing
+      - check-success=CI / validate
+      - check-success=CI / unit-tests
+      - check-success=CI / integration-tests
+    actions:
+      queue:
+        name: Merge
+        method: squash
     # Main merge queue enforcing repository quality gates and branch protection policy
     merge_method: squash
     speculative_checks: 2
