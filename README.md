@@ -1,298 +1,243 @@
-# 🚀 Enterprise-Grade Development Environment Setup
-
-> Production-ready setup repository with idempotent installation, version locking, offline support, and multi-agent orchestration.
-
-[![🚀 Codespace Setup](https://github.com/eyshoit-commits/setup/actions/workflows/codespace-setup.yml/badge.svg)](https://github.com/eyshoit-commits/setup/actions/workflows/codespace-setup.yml)
-[![🔒 Security Scan](https://github.com/eyshoit-commits/setup/actions/workflows/security-scan.yml/badge.svg)](https://github.com/eyshoit-commits/setup/actions/workflows/security-scan.yml)
-
-## ✨ Features
-
-### 🔄 **Idempotent Installation**
-- Run setup multiple times safely without side effects
-- Smart version checking with skip logic
-- Status summary: `INSTALLED / SKIPPED / FAILED`
-
-### 🔐 **Deterministic Version Locking**
-- All tool versions pinned in `config/versions.env`
-- No surprises in CI/CD pipelines
-- Optional `SETUP_ALLOW_LATEST=true` for development
-
-### 📦 **Offline/Air-gap Support**
-- Use `artifacts/` directory for local installers
-- Corporate network friendly
-- Zero internet dependency option
-
-### 📊 **Machine-Readable Reports**
-- `setup-report.json` - Installation status
-- `.mcp/context.json` - Agent-ready environment metadata
-- Perfect for automation and telemetry
-
-### 🐚 **Shell-Agnostic Environment**
-- Centralized `env.d/` configuration
-- Bash, Zsh, Fish, PowerShell support
-- No more profile spaghetti
-
-### 🔒 **Security-First Approach**
-- Pre-commit hooks (ruff, eslint, clippy)
-- Gitleaks secret scanning
-- Dependency auditing
-- `.env` leak prevention
-
-### 🤖 **MCP/Agent-Ready**
-- OpenCode agent definitions
-- Multi-agent orchestration
-- Context-aware workflows
-
-### ✅ **Automated Smoke Tests**
-- Post-installation validation
-- Tests: Node, Python, Rust, pnpm
-- Exit with error on failure
-
-## 🚀 Quick Start
-
-### Linux/macOS
-
-```bash
-# Clone and setup
-git clone https://github.com/eyshoit-commits/setup.git
-cd setup
-bash scripts/setup.sh
-```
-
-### Windows
-
-```powershell
-# Clone and setup
-git clone https://github.com/eyshoit-commits/setup.git
-cd setup
-.\scripts\setup.ps1
-```
-
-### GitHub Codespaces
-
-Click "Code" → "Create codespace" - setup runs automatically! ✨
-
-## 📁 Repository Structure
-
-```
-setup/
-├── .devcontainer/          # DevContainer configuration
-├── .github/
-│   ├── copilot-instructions.md
-│   └── workflows/          # CI/CD pipelines
-├── .opencode/              # Agent definitions
-│   ├── agents/             # Specialized agents
-│   └── skills/             # Reusable skills
-├── .mcp/                   # MCP context (generated)
-├── scripts/                # Setup automation
-│   ├── setup.sh            # Main setup (Bash)
-│   ├── setup.ps1           # Main setup (PowerShell)
-│   ├── validate.sh         # Pre-flight checks
-│   ├── smoke-test.sh       # Post-install validation
-│   └── generate-report.sh  # Report generator
-├── config/
-│   ├── versions.env        # 📌 Version locks
-│   ├── .tool-versions      # asdf compatible
-│   ├── requirements.txt    # Python dependencies
-│   └── pre-commit-config.yaml
-├── env.d/                  # Shell-agnostic environment
-│   ├── 00-base.env
-│   ├── 10-tools.env        # Generated
-│   └── 99-custom.env
-├── artifacts/              # Offline installers
-├── docs/                   # Documentation
-│   ├── INSTALLATION.md
-│   ├── SECURITY.md
-│   └── TROUBLESHOOTING.md
-├── .gitleaks.toml          # Secret scanning config
-├── setup-report.json       # Generated status report
-└── package.json
-```
-
-## 🛠️ What Gets Installed
-
-| Tool | Purpose | Version Lock |
-|------|---------|--------------|
-| **nvm** | Node version manager | ✅ |
-| **Node.js** | JavaScript runtime | ✅ |
-| **pnpm** | Fast package manager | ✅ |
-| **Miniconda** | Python environment | ✅ |
-| **uv/uvx** | Fast Python tools | ✅ |
-| **Rust** | Systems programming | ✅ |
-| **pre-commit** | Git hooks framework | ✅ |
-
-## 📖 Documentation
-
-- **[Installation Guide](docs/INSTALLATION.md)** - Complete setup instructions
-- **[Security Policy](docs/SECURITY.md)** - Security features and best practices
-- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
-- **[Copilot Instructions](.github/copilot-instructions.md)** - AI development guidelines
-
-## 🔧 Configuration
-
-### Version Locking
-
-Edit `config/versions.env`:
-
-```bash
-NODE_VERSION=20.11.0
-PYTHON_VERSION=3.12.1
-RUST_VERSION=1.75.0
-PNPM_VERSION=8.15.1
-```
-
-### Allow Latest Versions
-
-```bash
-export SETUP_ALLOW_LATEST=true
-bash scripts/setup.sh
-```
-
-### Offline Installation
-
-1. Download installers to `artifacts/`
-2. Run setup (auto-detects and uses local files)
-
-See [INSTALLATION.md](docs/INSTALLATION.md#offline-installation) for details.
-
-## 🤖 Multi-Agent Orchestration
-
-This repository includes OpenCode agent definitions:
-
-- **orchestrator** - Coordinates multi-agent workflows
-- **backend-agent** - Python/Rust development
-- **frontend-agent** - TypeScript/React development
-- **devops-agent** - CI/CD and infrastructure
-- **testing-agent** - QA and validation
-
-Agents are context-aware via `.mcp/context.json`.
-
-## 🔒 Security Features
-
-### Pre-commit Hooks
-
-Automatically installed, runs on every commit:
-
-```bash
-# Python
-ruff check --fix
-ruff format
-
-# JavaScript/TypeScript
-eslint --fix
-
-# Rust
-cargo fmt
-cargo clippy
-```
-
-### Secret Scanning
-
-Gitleaks runs automatically:
-- On every push/PR
-- Weekly scheduled scans
-- Manual: `gitleaks detect --verbose`
-
-### Dependency Auditing
-
-```bash
-# NPM
-npm audit
-
-# Python
-pip-audit -r config/requirements.txt
-```
-
-## 📊 Reports
-
-### Setup Report (`setup-report.json`)
-
-```json
-{
-  "timestamp": "2026-01-02T12:00:00Z",
-  "os": "Linux",
-  "tools": [...],
-  "summary": {
-    "installed": 4,
-    "skipped": 2,
-    "failed": 0
-  },
-  "smoke_tests": {
-    "node": "passed",
-    "python": "passed",
-    "rust": "passed"
-  }
-}
-```
-
-### MCP Context (`.mcp/context.json`)
-
-Agent-ready environment metadata for automated workflows.
-
-## 🧪 Testing
-
-```bash
-# Validate environment
-bash scripts/validate.sh
-
-# Run smoke tests
-bash scripts/smoke-test.sh
-
-# Full setup + test
-bash scripts/setup.sh && bash scripts/smoke-test.sh
-```
-
-## 📦 NPM Scripts
-
-```bash
-npm run setup          # Run setup
-npm run validate       # Validate environment
-npm run test           # Run smoke tests
-npm run security:scan  # Run gitleaks
-```
-
-## 🌐 Cross-Platform Support
-
-| Platform | Script | Status |
-|----------|--------|--------|
-| Linux | `scripts/setup.sh` | ✅ Tested |
-| macOS | `scripts/setup.sh` | ✅ Tested |
-| Windows | `scripts/setup.ps1` | ✅ Tested |
-| Codespaces | Auto-setup | ✅ Tested |
-
-## 🤝 Contributing
-
-1. Read [SECURITY.md](docs/SECURITY.md)
-2. Check [.github/copilot-instructions.md](.github/copilot-instructions.md)
-3. Maintain both Bash and PowerShell versions
-4. Test idempotency
-5. Update documentation
-
-## 📝 License
-
-MIT
-
-## 🆘 Support
-
-- **Issues**: [GitHub Issues](https://github.com/eyshoit-commits/setup/issues)
-- **Documentation**: [docs/](docs/)
-- **Troubleshooting**: [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
-
-## ⭐ Features at a Glance
-
-- ✅ Idempotent installation
-- ✅ Version locking
-- ✅ Offline support
-- ✅ JSON reports
-- ✅ Shell-agnostic
-- ✅ Security scanning
-- ✅ MCP/Agent ready
-- ✅ Automated tests
-- ✅ Cross-platform
-- ✅ DevContainer ready
-- ✅ GitHub Actions CI
-- ✅ Pre-commit hooks
+# 🚀 Enterprise Setup Repository
+
+> Complete enterprise-grade repository setup with GitHub Marketplace Apps, OpenCode Agents, MCP Integration, and automated workflows.
+
+## Status
+
+### Security
+![CodeQL](https://github.com/eyshoit-commits/setup/actions/workflows/security-scan.yml/badge.svg)
+![Snyk](https://img.shields.io/badge/Snyk-Monitored-4C4A73?logo=snyk)
+![Secret Detection](https://img.shields.io/badge/Secret%20Detection-Active-success)
+
+### Code Quality
+![Codacy](https://img.shields.io/badge/Codacy-A-brightgreen?logo=codacy)
+![Codecov](https://img.shields.io/badge/Codecov-Active-F01F7A?logo=codecov)
+![CodeFactor](https://img.shields.io/badge/CodeFactor-A+-brightgreen?logo=codefactor)
+![ShellCheck](https://github.com/eyshoit-commits/setup/actions/workflows/code-quality.yml/badge.svg)
+
+### AI Review
+![CodeRabbit](https://img.shields.io/badge/CodeRabbit-Active-blue?logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnoiIGZpbGw9IndoaXRlIi8+PC9zdmc+)
+![CodiumAI](https://img.shields.io/badge/CodiumAI-Active-blue?logo=ai)
+
+### Infrastructure
+![MCP Health](https://github.com/eyshoit-commits/setup/actions/workflows/mcp-health-check.yml/badge.svg)
+![Drift Check](https://github.com/eyshoit-commits/setup/actions/workflows/drift-check.yml/badge.svg)
+![Setup Validation](https://github.com/eyshoit-commits/setup/actions/workflows/setup-validation.yml/badge.svg)
+
+### Development
+![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 ---
 
-**Made with ❤️ for enterprise development teams**
+## 📚 Overview / Übersicht
+
+**English:**  
+This repository provides a complete enterprise setup with integrated GitHub Marketplace apps, automated workflows, OpenCode agents, and MCP (Model Context Protocol) server integration. It includes comprehensive security scanning, code quality checks, AI-powered code reviews, and automated testing.
+
+**Deutsch:**  
+Dieses Repository bietet ein vollständiges Enterprise-Setup mit integrierten GitHub Marketplace Apps, automatisierten Workflows, OpenCode Agents und MCP (Model Context Protocol) Server-Integration. Es umfasst umfassende Sicherheitsscans, Code-Qualitätsprüfungen, KI-gestützte Code-Reviews und automatisierte Tests.
+
+---
+
+## ✨ Features
+
+### 🔐 Security & Compliance
+- **CodeQL Analysis** - Advanced security vulnerability detection
+- **Snyk Security Scanning** - Dependency vulnerability monitoring
+- **Secret Detection** - Prevent credential leaks with TruffleHog & Gitleaks
+- **Dependency Review** - Automated dependency security checks
+
+### 📊 Code Quality
+- **Codacy Integration** - Automated code quality analysis
+- **Codecov** - Test coverage tracking and reporting
+- **CodeFactor** - Code quality scoring
+- **ESLint & ShellCheck** - Linting and formatting enforcement
+
+### 🤖 AI-Powered Reviews
+- **CodeRabbit AI** - Intelligent PR reviews with contextual suggestions
+- **CodiumAI PR Agent** - Automated test generation and code analysis
+
+### 🔄 Workflow Automation
+- **Setup Validation** - Repository structure and configuration checks
+- **Commit Validation** - Conventional Commits enforcement
+- **Drift Detection** - Infrastructure configuration monitoring
+- **MCP Health Checks** - Server connectivity and status monitoring
+
+### 🛠️ Development Tools
+- **OpenCode Agents** - Bash & PowerShell automation agents
+- **MCP Servers** - Filesystem, GitHub, Git, and search integration
+- **Git Hooks** - Pre-commit and commit-msg validation
+- **Setup Scripts** - Automated environment configuration
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Git 2.30+
+- Node.js 20+
+- npm 10+
+- GitHub CLI (optional but recommended)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/eyshoit-commits/setup.git
+cd setup
+
+# Run local setup
+./scripts/local-setup.sh
+
+# Validate environment
+./scripts/validate-environment.sh
+
+# Setup marketplace apps
+./scripts/setup-marketplace-apps.sh
+```
+
+For Windows (PowerShell):
+```powershell
+# Run PowerShell setup
+.\scripts\setup-marketplace-apps.ps1
+```
+
+---
+
+## 📖 Documentation
+
+- **[Setup Guide](docs/SETUP_GUIDE.md)** - Complete setup instructions (DE/EN)
+- **[Marketplace Apps](docs/RECOMMENDED_MARKETPLACE_APPS.md)** - App integration guide (DE/EN)
+- **[Architecture](docs/ARCHITECTURE.md)** - System architecture documentation (DE/EN)
+
+---
+
+## 🔧 Configuration
+
+### Secrets Management
+Copy the secrets template and configure your tokens:
+```bash
+cp .github/secrets-template.env .env
+# Edit .env and add your tokens
+```
+
+Required secrets for full functionality:
+- `SNYK_TOKEN` - Snyk security scanning
+- `CODECOV_TOKEN` - Code coverage reporting
+- `CODACY_PROJECT_TOKEN` - Code quality analysis
+- `GITHUB_TOKEN` - GitHub API access
+
+### Branch Protection
+Apply branch protection rules using the configuration:
+```bash
+# Reference: .github/branch-protection.json
+# Apply via GitHub UI: Settings > Branches > Add rule
+```
+
+---
+
+## 🔄 Workflows
+
+| Workflow | Trigger | Description |
+|----------|---------|-------------|
+| [Setup Validation](.github/workflows/setup-validation.yml) | Push, PR | Validates repository structure |
+| [Security Scan](.github/workflows/security-scan.yml) | Push, PR, Schedule | CodeQL, Snyk, secret detection |
+| [Code Quality](.github/workflows/code-quality.yml) | Push, PR | Codacy, Codecov, linting |
+| [AI Review](.github/workflows/ai-review.yml) | PR | CodeRabbit, CodiumAI |
+| [MCP Health Check](.github/workflows/mcp-health-check.yml) | Push, Schedule | MCP server monitoring |
+| [Drift Check](.github/workflows/drift-check.yml) | Push, Schedule | Configuration drift detection |
+| [Commit Validation](.github/workflows/commit-validation.yml) | PR | Conventional Commits validation |
+| [Sandbox Test](.github/workflows/sandbox-test.yml) | Push to sandbox/* | Integration testing |
+
+---
+
+## 🤝 Contributing
+
+We follow [Conventional Commits](https://www.conventionalcommits.org/) specification.
+
+Commit message format:
+```
+type(scope): description
+
+[optional body]
+
+[optional footer]
+```
+
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+
+---
+
+## 📦 Project Structure
+
+```
+setup/
+├── .github/
+│   ├── workflows/          # GitHub Actions workflows (8 workflows)
+│   ├── hooks/              # Git hooks (pre-commit, commit-msg)
+│   ├── branch-protection.json  # Branch protection config
+│   └── secrets-template.env    # Secrets template
+├── .opencode/
+│   └── agents/             # OpenCode agent configurations
+│       ├── bash-agent.yml
+│       └── powershell-agent.yml
+├── mcp/
+│   └── config.json         # MCP server configuration
+├── scripts/
+│   ├── setup-marketplace-apps.sh    # Bash setup script
+│   ├── setup-marketplace-apps.ps1   # PowerShell setup script
+│   ├── validate-environment.sh      # Environment validation
+│   └── local-setup.sh               # Local development setup
+├── docs/
+│   ├── SETUP_GUIDE.md                    # Setup instructions
+│   ├── RECOMMENDED_MARKETPLACE_APPS.md   # Marketplace apps guide
+│   └── ARCHITECTURE.md                   # Architecture documentation
+└── README.md
+```
+
+---
+
+## 🔗 Integrated Services
+
+### GitHub Marketplace Apps
+- [CodeRabbit](https://github.com/apps/coderabbitai) - AI code reviews
+- [CodiumAI](https://github.com/apps/codiumai-pr-agent) - AI PR agent
+- [Codacy](https://www.codacy.com/) - Code quality
+- [Codecov](https://codecov.io/) - Coverage tracking
+- [Snyk](https://snyk.io/) - Security scanning
+- [CodeFactor](https://www.codefactor.io/) - Code analysis
+
+### MCP Servers
+- Filesystem Server - File operations
+- GitHub Server - GitHub API integration
+- Git Server - Git operations
+- Brave Search - Documentation lookup
+
+---
+
+## 📝 License
+
+MIT License - see LICENSE file for details
+
+---
+
+## 🌟 Support
+
+- 📖 [Documentation](docs/)
+- 🐛 [Issue Tracker](https://github.com/eyshoit-commits/setup/issues)
+- 💬 [Discussions](https://github.com/eyshoit-commits/setup/discussions)
+
+---
+
+## 🙏 Acknowledgments
+
+Built with ❤️ using:
+- GitHub Actions
+- Model Context Protocol (MCP)
+- OpenCode Framework
+- Industry-leading security and quality tools
+
+---
+
+**Made with 🚀 for Enterprise Development**
