@@ -1,0 +1,11 @@
+{
+  "name": "security-agent",
+  "version": "1.0.0",
+  "description": "Security scanning and compliance checks",
+  "skills": ["@IgorWarzocha/Opencode-Context-Analysis-Plugin"],
+  "triggers": ["security", "scan", "audit"],
+  "actions": {
+    "scan": "scripts/security-scan.sh",
+    "compliance-check": ".github/workflows/compliance.yml"
+  }
+}
