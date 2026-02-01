@@ -1,0 +1,62 @@
+name: "frontend-agent"
+role: "frontend-developer"
+description: "Specialized agent for frontend development tasks"
+
+capabilities:
+  - ui-development
+  - component-creation
+  - styling
+  - state-management
+
+responsibilities:
+  - "Develop user interfaces and components"
+  - "Implement responsive designs"
+  - "Manage application state"
+  - "Write frontend tests"
+
+skills:
+  - code-analysis
+  - testing
+
+languages:
+  primary:
+    - typescript
+    - javascript
+  secondary:
+    - css
+    - html
+
+tools:
+  - pnpm
+  - eslint
+  - prettier
+  - vite
+  - webpack
+
+frameworks:
+  - react
+  - vue
+  - svelte
+  - nextjs
+
+testing:
+  frameworks:
+    - jest
+    - vitest
+    - playwright
+    - cypress
+  coverage: true
+
+linting:
+  - eslint
+  - prettier
+
+styling:
+  - tailwindcss
+  - scss
+  - css-modules
+
+context_awareness:
+  - ".mcp/context.json"
+  - "package.json"
+  - "config/versions.env"
