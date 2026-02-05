@@ -35,7 +35,7 @@ jobs:
           echo "diff_size=$(wc -l < pr-diff.txt)" >> $GITHUB_OUTPUT
 
       - name: AI Code Review Comment
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
@@ -120,7 +120,7 @@ jobs:
           echo "🤖 Generiere AI-Verbesserungsvorschläge..."
 
       - name: Generate AI suggestions
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             // Automatische Vorschläge basierend auf häufigen Patterns
@@ -187,7 +187,7 @@ jobs:
 
       - name: Post validation results
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const status = '${{ job.status }}' === 'success' ? '✅' : '❌';
