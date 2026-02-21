@@ -1,0 +1,49 @@
+name: "main-orchestrator"
+role: "orchestrator"
+description: "Main orchestrator for coordinating multi-agent workflows"
+
+capabilities:
+  - task-routing
+  - agent-coordination
+  - workflow-management
+  - context-sharing
+
+responsibilities:
+  - "Coordinate activities between specialized agents"
+  - "Route tasks to appropriate agents based on expertise"
+  - "Maintain global context and state"
+  - "Ensure workflow consistency and error handling"
+
+skills:
+  - code-analysis
+  - testing
+  - documentation
+
+context:
+  mcp_aware: true
+  reads:
+    - ".mcp/context.json"
+    - "setup-report.json"
+    - "config/versions.env"
+
+tooling:
+  - git
+  - bash
+  - jq
+
+decision_rules:
+  - condition: "task involves backend code"
+    action: "delegate to backend-agent"
+  - condition: "task involves frontend code"
+    action: "delegate to frontend-agent"
+  - condition: "task involves infrastructure"
+    action: "delegate to devops-agent"
+  - condition: "task involves testing"
+    action: "delegate to testing-agent"
+
+communication:
+  protocol: "json-rpc"
+  channels:
+    - "stdout"
+    - "setup-report.json"
+    - ".mcp/context.json"
