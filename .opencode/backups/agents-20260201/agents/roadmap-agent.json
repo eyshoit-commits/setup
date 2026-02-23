@@ -1,0 +1,10 @@
+{
+  "name": "roadmap-agent",
+  "version": "1.0.0",
+  "description": "Project roadmap management",
+  "skills": ["@IgorWarzocha/Opencode-Roadmap"],
+  "triggers": ["roadmap", "plan", "milestone"],
+  "actions": {
+    "generate-roadmap": "scripts/generate-roadmap.sh"
+  }
+}

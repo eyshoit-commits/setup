@@ -1,0 +1,12 @@
+{
+  "name": "setup-agent",
+  "version": "1.0.0",
+  "description": "Automated repository setup and initialization",
+  "skills": ["@shuv1337/oc-manager", "@code-yeongyu/oh-my-opencode"],
+  "triggers": ["setup", "init", "configure"],
+  "actions": {
+    "setup-repo": "scripts/setup.sh",
+    "validate": "scripts/validate-setup.sh",
+    "health-check": "scripts/mcp-health-check.sh"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "dev-agent",
+  "version": "1.0.0",
+  "description": "Development workflow automation",
+  "skills": ["@VoltAgent/awesome-claude-code-subagents", "@darrenhinde/OpenAgents"],
+  "triggers": ["dev", "build", "test"],
+  "actions": {
+    "lint": "npm run lint",
+    "test": "npm test",
+    "build": "npm run build"
+  }
+}
